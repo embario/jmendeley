@@ -1,0 +1,16 @@
+title JMendeley Workflow (Searching)
+participant Researcher as r
+participant JMendeley as jm
+participant DigitalLibrary as dl
+participant Mendeley as m
+
+r->jm: Do search
+jm->dl: Give me the first 25 papers
+dl->jm: Results of first 25 papers
+jm->r: Show results
+r->jm: Refines Search
+jm->dl: Refined search request
+dl->jm: Return refined results
+jm->r: Show results
+r->jm: Selects papers to send
+jm->m: Send papers to Mendeley
