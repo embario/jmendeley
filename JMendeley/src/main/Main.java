@@ -13,8 +13,8 @@ import org.scribe.oauth.OAuthService;
 import util.MendeleyApi;
 
 public class Main {
-	private static final String CONSUMER_KEY = "b60776803ae54e6b23a3bacac395aa6104f85d33a";
-	private static final String CONSUMER_SECRET = "448b52f707d379962edce3857afc1267";
+	private static final String CONSUMER_KEY = "cfc24e1782a13e619030a531177df76504f811506";
+	private static final String CONSUMER_SECRET = "f7aac3649ec6f18f7d7a2cc7c3f7f3d9";
 	
 	private static OAuthService service;
 	private static Token access;
@@ -45,38 +45,5 @@ public class Main {
 		Verifier verify = new Verifier(scn.nextLine());
 		
 		access = service.getAccessToken(requestToken, verify);
-	}
-
-	private void referenceToOldStuff() {
-		// For reading input
-		Scanner scn = new Scanner(System.in);
-
-		// Build OAuth service
-		OAuthService service = new ServiceBuilder().provider(MendeleyApi.class)
-				.apiSecret("448b52f707d379962edce3857afc1267")
-				.apiKey("b60776803ae54e6b23a3bacac395aa6104f85d33a").build();
-
-		// Request access to Mendeley
-		Token requestToken = service.getRequestToken();
-
-		// Retrieve the URL for Mendeley authorization, direct user there,
-		// wait for response, construct verifier
-		String authURL = service.getAuthorizationUrl(requestToken);
-		System.out.println("Go to " + authURL);
-		System.out.print("Enter verification code: ");
-		Verifier verify = new Verifier(scn.nextLine());
-
-		// Get access token
-		Token accessToken = service.getAccessToken(requestToken, verify);
-
-		// Request my document library ids and sign with access token
-		OAuthRequest request = new OAuthRequest(Verb.GET,
-				"http://api.mendeley.com/oapi/library?items=25");
-		service.signRequest(accessToken, request);
-		Response response = request.send();
-
-		// Print output
-		System.out.println("Output:\n" + response.getBody());
-
 	}
 }
