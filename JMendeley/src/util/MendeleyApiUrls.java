@@ -8,7 +8,7 @@ package util;
  * @author A,M,M
  *
  */
-public final class MendeleyAPIUrls {
+public final class MendeleyApiUrls {
     
     /**
      * The Interface OAuthUrls.
