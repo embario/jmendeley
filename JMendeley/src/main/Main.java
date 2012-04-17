@@ -7,6 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -35,11 +38,20 @@ public class Main {
 				"http://api.mendeley.com/oapi/library?items=25");
 		service.signRequest(access, request);
 		Response response = request.send();
-		System.out.println(response.getBody());
+		try {
+			JSONObject results = new JSONObject(response.getBody());
+			JSONArray ids = results.getJSONArray("document_ids");
+			System.out.println("Results: ");
+			for(int i = 0; i < ids.length(); i++) {
+				System.out.println(ids.getString(i));
+			}
+			System.out.println("..." + (results.getInt("total_pages") - results.getInt("current_page") - 1) + " more pages");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static Token connectToMendeley() {
-
 		// Build OAuth service
 		service = new ServiceBuilder().provider(MendeleyApi.class)
 				.apiKey(CONSUMER_KEY)
