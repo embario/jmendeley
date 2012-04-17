@@ -45,5 +45,8 @@ public class Main {
 		Verifier verify = new Verifier(scn.nextLine());
 		
 		access = service.getAccessToken(requestToken, verify);
+		System.out.println("We will be using the accessToken: " + access.getToken());
+		System.out.println("We will also be using the access Token secret: " + access.getSecret());
+		
 	}
 }
