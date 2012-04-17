@@ -31,8 +31,17 @@ public class Main {
 	public static void main(String args[]) {
 		// start up UI, ask user for info, etc
 		// for now, just connect to the mand
-		access = connectToMendeley();
 		
+		// Build OAuth service
+		service = new ServiceBuilder().provider(MendeleyApi.class)
+				.apiKey(CONSUMER_KEY)
+				.apiSecret(CONSUMER_SECRET).build();
+		access = ConnectToMendeley();
+		
+		TestDownloads();
+	}
+	
+	private static void TestDownloads() {
 		// Request my document library ids and sign with access token
 		OAuthRequest request = new OAuthRequest(Verb.GET, 
 				"http://api.mendeley.com/oapi/library?items=25");
@@ -41,7 +50,7 @@ public class Main {
 		try {
 			JSONObject results = new JSONObject(response.getBody());
 			JSONArray ids = results.getJSONArray("document_ids");
-			System.out.println("Results: ");
+			System.out.println("First 25 document IDs: ");
 			for(int i = 0; i < ids.length(); i++) {
 				System.out.println(ids.getString(i));
 			}
@@ -51,11 +60,8 @@ public class Main {
 		}
 	}
 	
-	public static Token connectToMendeley() {
-		// Build OAuth service
-		service = new ServiceBuilder().provider(MendeleyApi.class)
-				.apiKey(CONSUMER_KEY)
-				.apiSecret(CONSUMER_SECRET).build();
+	public static Token ConnectToMendeley() {
+		boolean couldCreate = true;
 		
 		if (TOKEN_FILE.exists()) {
 			try {
@@ -68,7 +74,9 @@ public class Main {
 			try {
 				TOKEN_FILE.createNewFile();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				System.err.println("Unable to create persistent token file -- you will have to reauthorize with " +
+						"Mendeley on each launch.");
+				couldCreate = false;
 			}
 		}
 		
@@ -86,9 +94,8 @@ public class Main {
 		Verifier verify = new Verifier(scn.nextLine());
 		
 		Token access = service.getAccessToken(requestToken, verify);
-		System.out.println("We will be using the accessToken: " + access.getToken());
-		System.out.println("We will also be using the access Token secret: " + access.getSecret());
 		
+		// Print token information to file.
 		BufferedWriter f;
 		try {
 			f = new BufferedWriter(new FileWriter(TOKEN_FILE));
@@ -97,7 +104,10 @@ public class Main {
 			f.write(access.getSecret());
 			f.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			if(couldCreate) //Don't print duplicate error messages
+				System.err.println("Unable to write token information to file -- you will have to reauthorize with " +
+					"Mendeley on next launch.");
+			TOKEN_FILE.delete(); //Don't want a corrupted/incomplete token file lying around
 		}
 		
 		return access;
