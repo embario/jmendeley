@@ -16,8 +16,12 @@ public class Main {
 		
 		// Build OAuth service
 		AuthenticationManager am = AuthenticationManager.getInstance(CONSUMER_KEY, CONSUMER_SECRET);
+		if (am.connectToMendeley() == true){
+			
+			am.testDownloads();
+			
+		}
 		
-		am.testDownloads();
 	}
 	
 }
