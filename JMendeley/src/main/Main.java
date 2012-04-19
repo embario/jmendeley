@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +31,8 @@ public class Main {
 	private static Token access;
 	
 	public static void main(String args[]) {
+		DocumentBuilder db;
+		
 		// start up UI, ask user for info, etc
 		// for now, just connect to the mand
 		
@@ -69,7 +73,9 @@ public class Main {
 				String token = tokenReader.nextLine();
 				String secret = tokenReader.nextLine();
 				return new Token(token, secret);
-			} catch (FileNotFoundException e) { /* Continue on and create a new token */ }
+			} catch (FileNotFoundException e) { 
+				// Shouldn't happen due to previous check
+			}
 		} else {
 			try {
 				TOKEN_FILE.createNewFile();
@@ -104,10 +110,10 @@ public class Main {
 			f.write(access.getSecret());
 			f.close();
 		} catch (IOException e) {
-			if(couldCreate) //Don't print duplicate error messages
+			if(couldCreate) // Don't print duplicate error messages
 				System.err.println("Unable to write token information to file -- you will have to reauthorize with " +
 					"Mendeley on next launch.");
-			TOKEN_FILE.delete(); //Don't want a corrupted/incomplete token file lying around
+			TOKEN_FILE.delete(); // Don't want a corrupted/incomplete token file lying around
 		}
 		
 		return access;
