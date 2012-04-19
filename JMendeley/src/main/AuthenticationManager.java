@@ -109,6 +109,7 @@ public class AuthenticationManager {
 				this._token_file.createNewFile();
 
 		} catch (Exception e) {
+			this._token_file.delete();
 			this._token_file.createNewFile();
 		}
 

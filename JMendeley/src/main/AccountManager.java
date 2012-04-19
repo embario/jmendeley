@@ -52,6 +52,7 @@ public class AccountManager {
 		 case 401: throw new JSONException ("Status Code " + statusCode + ": Unauthorized request");
 		 case 404: throw new JSONException ("Status Code " + statusCode + ": Not found");
 		 case 200: break;
+		 default: throw new JSONException ("Status Code " + statusCode + ": Unexpected Status Code");
 		 }
 		 		 
 		 try {
@@ -60,13 +61,15 @@ public class AccountManager {
 			 JSONObject results = new JSONObject(response.getBody());
 			 JSONObject main = results.getJSONObject("main");
 		
+			 String profileid, name, academic_status, research_interests, discipline, url;
+			 
 			 //Gather the <key,value> pairs found inside the JSON Object.
-			 String profileid = main.getString("profile_id");
-			 String name = main.getString("name");
-			 String academic_status = main.getString("academic_status");
-			 String research_interests = main.getString ("research_interests");
-			 String discipline = main.getString("discipline_name");
-			 String url = main.getString("url");
+			 profileid = this.getValueFromJSONObject(main, "profile_id");
+			 name = this.getValueFromJSONObject(main, "name");
+			 academic_status = this.getValueFromJSONObject(main, "academic_status");
+			 research_interests = this.getValueFromJSONObject(main, "research_interests");
+			 discipline = this.getValueFromJSONObject(main, "discipline_name");
+			 url = this.getValueFromJSONObject(main, "url");
 		
 			 //Create an Account object and return it.
 			 result = new Account(profileid, name, academic_status, discipline, research_interests, url);
@@ -78,6 +81,15 @@ public class AccountManager {
 		 return null;
 	 }
 	
+	 
+	 public String getValueFromJSONObject (JSONObject json, String key){
+		 
+		 try { return json.getString(key);}
+		 catch (JSONException e){
+			 
+			 return "";
+		 }
+	 }
 	
 	public String toString(){
 		
