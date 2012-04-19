@@ -144,13 +144,28 @@ public class AuthenticationManager {
 		return true;
 	}
 
-	 public static AuthenticationManager getInstance(String consumer_key,
-			String consumer_secret) throws FileNotFoundException, IOException {
+	 public static AuthenticationManager getInstance(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
 
-		return (_singleton == null) ? new AuthenticationManager(consumer_key,
-				consumer_secret) : _singleton;
-
-	}
+		return (_singleton == null) ? new AuthenticationManager(consumer_key, consumer_secret) : _singleton;
+		
+	 }
+	 
+	 
+	 /**
+	  * This method accepts a valid Verb object {GET, POST, PUT} and a Mendeley URL
+	  * for an intended request to the Mendeley API.
+	  * @param verb
+	  * @param apiURL
+	  * @return
+	  */
+	 public Response sendRequest (Verb verb, String apiURL){
+		 
+		 OAuthRequest request = new OAuthRequest (verb, apiURL);
+		 this._oauthService.signRequest(this._accessToken, request);
+		 return request.send();
+		 
+	 }
+	 
 
 	public void testDownloads() {
 		// Request my document library ids and sign with access token
