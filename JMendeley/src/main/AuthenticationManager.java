@@ -153,6 +153,21 @@ public class AuthenticationManager {
 		return _singleton;
 	 }
 	 
+	 /**
+	  * This method accepts a valid Verb object {GET, POST, PUT} and a Mendeley URL
+	  * for an intended request to the public Mendeley API.
+	  * @param verb
+	  * @param apiURL
+	  * @return
+	  */
+	 public Response sendPublicRequest (Verb verb, String apiURL){
+		 
+		 OAuthRequest request = new OAuthRequest (verb, apiURL);
+		 request.addQuerystringParameter("consumer_key", _consumer_key);
+		 return request.send();
+		 
+	 }
+	 
 	 
 	 /**
 	  * This method accepts a valid Verb object {GET, POST, PUT} and a Mendeley URL
