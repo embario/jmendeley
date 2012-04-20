@@ -110,41 +110,38 @@ public class SearchManager {
 		
 		System.out.println("Do you wish to add these papers to your Mendeley account? (yes/no)");
 		
-		if(scn.nextLine().equalsIgnoreCase("yes")) {
+		if (scn.nextLine().equalsIgnoreCase("yes")) {
 			
-			for(Paper p : papers) {
+			for (Paper p : papers) {
 				
 				try {
-					Response response = am.sendRequest(Verb.POST, "http://api.mendeley.com/oapi/library/documents?document=" + URLEncoder.encode(p.toJSON().toString().trim(), "UTF-8").replace("+", "%20"));
+					
+					//First, encode the paper JSON Object for the URL.
+					String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTR-8").replace("+", "%20");
+					
+					//Craft the response, POST-it to Mendeley, and get the Document ID back.
+					Response response = am.sendRequest(Verb.POST, "http://api.mendeley.com/oapi/library/documents?document=" + encodedURL);
 					JSONObject docIDObj = new JSONObject(response.getBody());
 					String id = docIDObj.getString("document_id");
 					
+					//Convert the PDF to bytes, encrypt with SHA.
 				    byte[] fileBytes = ByteStreams.toByteArray(p.pdf.openStream());
-				    
 				    String sha = SHASum.SHASum(fileBytes);
 					
+				    //Now, send off the PDF bytes off to specified document PUT request.
 					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format("http://www.mendeley.com/oapi/library/documents/%s/",id));
 					request.addOAuthParameter("oauth_body_hash", sha);
 					request.addPayload(fileBytes);
 					response = am.sendRequest(request);
+					
+					//If the status is good:
 					if(response.getCode() == 201)
 						System.out.println("\"" + p.title + "\" was uploaded successfully.");
 					else 
 						System.out.println(String.format("Error %d: \"%s\" failed to upload [%s]",response.getCode(),p.title,response.getBody()));
 					
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} catch (Exception e) { e.printStackTrace();}
+				
 			}
 			
 			return true;
