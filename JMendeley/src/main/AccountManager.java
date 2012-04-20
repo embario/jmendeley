@@ -25,7 +25,10 @@ public class AccountManager {
 	
 	public static AccountManager getInstance (AuthenticationManager am) throws JSONException{
 		
-		return (_singleton == null) ? new AccountManager(am) : _singleton;
+		if (_singleton == null)
+			_singleton = new AccountManager(am);
+		
+		return _singleton;
 	}
 	
 	

@@ -146,9 +146,11 @@ public class AuthenticationManager {
 	}
 
 	 public static AuthenticationManager getInstance(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
-
-		return (_singleton == null) ? new AuthenticationManager(consumer_key, consumer_secret) : _singleton;
 		
+		if (_singleton == null)
+			_singleton = new AuthenticationManager (consumer_key, consumer_secret);
+		
+		return _singleton;
 	 }
 	 
 	 

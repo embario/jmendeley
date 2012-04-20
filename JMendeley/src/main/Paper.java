@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Paper {
+	
 	public String title;
 	public String[] authors;
 	public URL pdf;
@@ -18,6 +19,7 @@ public class Paper {
 	public Paper() {}
 	
 	public JSONObject toJSON() {
+		
 		JSONObject json = new JSONObject();
 		try {
 			json.put("type", type);

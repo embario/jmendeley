@@ -19,9 +19,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ArXivConnectionManager {
-	public List<Paper> search(String searchTerm, String ti, String au, int maxResults) {
+	
+	/**
+	 * The method search() searches.
+	 * @param searchTerm
+	 * @param title
+	 * @param author
+	 * @param maxResults
+	 * @return
+	 */
+	public List<Paper> search(String searchTerm, String title, String author, int maxResults) {
+		
 		try {
-			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, ti, au), maxResults));
+			
+			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, title, author), maxResults));
 			final InputStream stream = url.openStream();
 			
 			final DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -32,6 +43,7 @@ public class ArXivConnectionManager {
 			
 			Element doc = results.getDocumentElement();
 			NodeList entries = doc.getElementsByTagName("entry");
+			
 			for(int i = 0; i < entries.getLength(); i++) {
 				Paper p = new Paper();
 				p.venue = "";
@@ -39,14 +51,14 @@ public class ArXivConnectionManager {
 				
 				Element entry = (Element) entries.item(i);
 				
-				Element title = (Element) entry.getElementsByTagName("title").item(0);
-				p.title = title.getTextContent();
+				Element titleElement = (Element) entry.getElementsByTagName("title").item(0);
+				p.title = titleElement.getTextContent();
 				
 				NodeList authors = entry.getElementsByTagName("author");
 				String[] authorNames = new String[authors.getLength()];
 				for(int j = 0; j < authors.getLength(); j++) {
-					Element author = (Element) authors.item(j);
-					Element authorName = (Element) author.getElementsByTagName("name").item(0);
+					Element authorElement = (Element) authors.item(j);
+					Element authorName = (Element) authorElement.getElementsByTagName("name").item(0);
 					authorNames[j] = authorName.getTextContent();
 				}
 				p.authors = authorNames;
@@ -70,6 +82,7 @@ public class ArXivConnectionManager {
 			}
 			
 			return papers;
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
@@ -80,25 +93,25 @@ public class ArXivConnectionManager {
 		return null;
 	}
 	
-	private String buildSearch(String all, String ti, String au) {
+	private String buildSearch(String all, String title, String author) {
 		StringBuilder term = new StringBuilder();
 		boolean alle = true, tie = true;
 		if(all == null || all.equals(""))
 			alle = false;
 		else term.append("all:" + all);
 		
-		if(ti == null || ti.equals(""))
+		if(title == null || title.equals(""))
 			tie = false;
 		else {
 			if(alle)
 				term.append("+AND+");
-			term.append("ti:"+ti);
+			term.append("ti:"+title);
 		}
 		
-		if(au != null && !au.equals("")) {
+		if(author != null && !author.equals("")) {
 			if(alle || tie)
 				term.append("+AND+");
-			term.append("au:"+au);
+			term.append("au:"+author);
 		}
 	
 		return term.toString();
