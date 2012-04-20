@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -20,7 +21,22 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class ArXivConnectionManager {
+public class ArXivSearchInterface implements LibrarySearchInterface {
+	
+	/** Our singleton object **/
+	private static ArXivSearchInterface _singleton = null;
+	
+	
+	private ArXivSearchInterface() { }
+	
+	
+	public static ArXivSearchInterface getInstance () {
+		
+		if (_singleton == null)
+			_singleton = new ArXivSearchInterface();
+		
+		return _singleton;
+	}
 	
 	/**
 	 * The method search() searches.
@@ -31,7 +47,6 @@ public class ArXivConnectionManager {
 	 * @return
 	 */
 	public List<Paper> search(String searchTerm, String title, String author, int maxResults) {
-		
 		try {
 			
 			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, title, author), maxResults));
@@ -128,10 +143,5 @@ public class ArXivConnectionManager {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public static void main(String[] args) {
-		for(Paper p : new ArXivConnectionManager().search("","Funargs","Vitousek",10))
-			System.out.println(p.toJSON().toString());
 	}
 }
