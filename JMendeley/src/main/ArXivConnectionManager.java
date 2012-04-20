@@ -34,7 +34,8 @@ public class ArXivConnectionManager {
 		
 		try {
 			
-			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, title, author), maxResults));
+			String search = this.buildSearch(searchTerm, title, author);
+			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", search, maxResults));
 			final InputStream stream = url.openStream();
 			System.out.println(url);
 
@@ -48,6 +49,7 @@ public class ArXivConnectionManager {
 			NodeList entries = doc.getElementsByTagName("entry");
 			
 			for(int i = 0; i < entries.getLength(); i++) {
+				
 				Paper p = new Paper();
 				p.venue = "";
 				p.type = "Generic";
