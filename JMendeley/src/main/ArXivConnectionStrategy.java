@@ -21,22 +21,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class ArXivSearchInterface implements ConnectionStrategy {
-	
-	/** Our singleton object **/
-	private static ArXivSearchInterface _singleton = null;
-	
-	
-	private ArXivSearchInterface() { }
-	
-	
-	public static ArXivSearchInterface getInstance () {
-		
-		if (_singleton == null)
-			_singleton = new ArXivSearchInterface();
-		
-		return _singleton;
-	}
+public class ArXivConnectionStrategy implements ConnectionStrategy {
+
+	public ArXivConnectionStrategy() { }
 	
 	/**
 	 * The method search() searches.
@@ -111,7 +98,7 @@ public class ArXivSearchInterface implements ConnectionStrategy {
 		return null;
 	}
 
-	private String buildSearch(String all, String title, String author) {
+	public String buildSearch(String all, String title, String author) {
 		try {
 			all = (all==null)?null:URLEncoder.encode(all, "UTF-8");
 			title = (title==null)?null:URLEncoder.encode(title, "UTF-8");
@@ -143,5 +130,12 @@ public class ArXivSearchInterface implements ConnectionStrategy {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public String identifyConnection(){
+		
+		return "============================\nImported from ArXiv: \n";
+		
+		
 	}
 }

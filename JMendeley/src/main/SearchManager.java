@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -33,6 +34,7 @@ public class SearchManager {
 	private static SearchManager _singleton;
 	/** The references to LibrarySearchInterfaces **/
 	private ConnectionStrategy arXiv, mendeley;
+	private ArrayList <ConnectionStrategy> _connections = null;
 	/** Our reference to the singleton AccountManager **/
 	private AccountManager acm;
 	/** Our reference to the singleton Authentication Manager **/
@@ -41,8 +43,7 @@ public class SearchManager {
 	private SearchManager(AccountManager acm, AuthenticationManager am) {
 		this.acm = acm;
 		this.am = am;
-		arXiv = ArXivSearchInterface.getInstance();
-		mendeley = MendeleySearchInterface.getInstance(am);
+		this._connections = new ArrayList <ConnectionStrategy> ();
 	}
 	
 	
@@ -62,23 +63,50 @@ public class SearchManager {
 	}
 
 	
-	public void search() {
+	public void searchForPapers() {
 		
 		Scanner scn = new Scanner(System.in);
-		System.out.println("Type 'm' if you want to search Mendeley. Type 'a' if you want to search arXiv.");
-		String choice = scn.nextLine();
-		ConnectionStrategy search = null;
-		//if(choice.equalsIgnoreCase)
-		
-		System.out.println("Please enter your search term.");
+		System.out.print("Please enter your search term: ");
 		String searchTerm = scn.nextLine();
+		System.out.print("How many results?: ");
+		int maxResults = Integer.parseInt(scn.nextLine());
+		System.out.println("Type 'm' if you want to search Mendeley. Type 'a' if you want to search arXiv. Type both if you want both.");
+		String choice = scn.nextLine();
 		
-		List<Paper> papers = arXiv.search(searchTerm, null, null, 5);
+		ArrayList <ConnectionStrategy> connections = this._connections;
+	
+		if (choice.trim().contains("m") == true)
+			connections.add(new MendeleyConnectionStrategy(this.am));
+		if (choice.trim().contains("a") == true)
+			connections.add(new ArXivConnectionStrategy());
+			
+		ArrayList <Paper> papers = new ArrayList <Paper> ();
 		
-		for(Paper p : papers) {
-			System.out.println(p.summarize());
-			System.out.println();
+		//Let the concurrency begin (here).
+		for (ConnectionStrategy s : connections){
+			
+			ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(searchTerm, null, null, maxResults);
+			
+			if(thesePapers == null)
+				continue;
+			
+			System.out.println(s.identifyConnection());
+			
+			for (Paper p : thesePapers){
+				System.out.println(p.summarize());
+				System.out.println();	
+			}
+			
+			//Add the papers found to the list.
+			papers.addAll(thesePapers);
+			
 		}
+		
+		sendPapersToMendeley(scn, papers);
+	}
+
+
+	private boolean sendPapersToMendeley(Scanner scn, List<Paper> papers) {
 		
 		System.out.println("Do you wish to add these papers to your Mendeley account? (yes/no)");
 		
@@ -118,7 +146,11 @@ public class SearchManager {
 					e.printStackTrace();
 				}
 			}
+			
+			return true;
 		}
-	}
+		
+		return false;
+	}//end send method
 
 }

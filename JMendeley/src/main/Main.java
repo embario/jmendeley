@@ -25,7 +25,7 @@ public class Main {
 			System.out.println(acm);
 			
 			SearchManager sm = SearchManager.getInstance(acm, am);
-			sm.search();
+			sm.searchForPapers();
 		}
 	}
 	

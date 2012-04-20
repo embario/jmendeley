@@ -7,26 +7,15 @@ import java.util.List;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 
-public class MendeleySearchInterface implements ConnectionStrategy {
+public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	
-	/** Our singleton object **/
-	private static MendeleySearchInterface _singleton = null;
 	/** Reference to the authentication manager singleton */
 	private AuthenticationManager auth;
 	
-	
-	private MendeleySearchInterface(AuthenticationManager auth) {
+	public MendeleyConnectionStrategy(AuthenticationManager auth) {
 		this.auth = auth;
 	}
 	
-	
-	public static MendeleySearchInterface getInstance(AuthenticationManager auth) {
-		
-		if (_singleton == null)
-			_singleton = new MendeleySearchInterface(auth);
-		
-		return _singleton;
-	}
 	
 	/**
 	 * The method search() searches.
@@ -37,6 +26,7 @@ public class MendeleySearchInterface implements ConnectionStrategy {
 	 * @return
 	 */
 	public List<Paper> search(String searchTerm, String title, String author, int maxResults) {
+		
 		String searchURL = String.format("http://api.mendeley.com/oapi/documents/search/%s/?items=%d&consumer_key=cfc24e1782a13e619030a531177df76504f811506", buildSearch(searchTerm, title, author), maxResults);
 		System.out.println(searchURL);
 		Response response = auth.sendPublicRequest(Verb.GET, searchURL);
@@ -46,7 +36,7 @@ public class MendeleySearchInterface implements ConnectionStrategy {
 		return null;
 	}
 	
-	private String buildSearch(String all, String title, String author) {
+	public  String buildSearch(String all, String title, String author) {
 		try {
 			all = (all==null)?null:URLEncoder.encode(all, "UTF-8").replace("+", "%20");
 			title = (title==null)?null:URLEncoder.encode(title, "UTF-8").replace("+", "%20");
@@ -78,6 +68,14 @@ public class MendeleySearchInterface implements ConnectionStrategy {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	
+	public String identifyConnection(){
+		
+		return "============================\nImported from Mendeley: \n";
+		
+		
 	}
 
 }

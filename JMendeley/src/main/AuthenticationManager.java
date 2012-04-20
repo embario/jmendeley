@@ -59,8 +59,7 @@ public class AuthenticationManager {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private AuthenticationManager(String consumer_key, String consumer_secret)
-			throws FileNotFoundException, IOException {
+	private AuthenticationManager(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
 
 		this._consumer_key = consumer_key;
 		this._consumer_secret = consumer_secret;
@@ -195,25 +194,5 @@ public class AuthenticationManager {
 		 return request.send();
 		 
 	 }
-	 
-
-	public void testDownloads() {
-		// Request my document library ids and sign with access token
-		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.mendeley.com/oapi/library?items=25");
-		this._oauthService.signRequest(this._accessToken, request);
-
-		Response response = request.send();
-		try {
-			JSONObject results = new JSONObject(response.getBody());
-			JSONArray ids = results.getJSONArray("document_ids");
-			System.out.println("First 25 document IDs: ");
-			for (int i = 0; i < ids.length(); i++) {
-				System.out.println(ids.getString(i));
-			}
-			System.out.println("..." + (results.getInt("total_pages") - results.getInt("current_page") - 1) + " more pages");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
 
 }// end class
