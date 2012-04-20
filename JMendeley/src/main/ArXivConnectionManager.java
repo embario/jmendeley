@@ -19,23 +19,23 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ArXivConnectionManager {
-	public List<Paper> search(String searchTerm, int num) {
+	public List<Paper> search(String searchTerm, String ti, String au, int maxResults) {
 		try {
-			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=all:%s&start=0&max_results=%d", searchTerm, num));
+			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, ti, au), maxResults));
 			final InputStream stream = url.openStream();
 			
 			final DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			
 			Document results = db.parse(stream);
 			
-			ArrayList<Paper> papers = new ArrayList<Paper>(num);
+			ArrayList<Paper> papers = new ArrayList<Paper>(maxResults);
 			
 			Element doc = results.getDocumentElement();
 			NodeList entries = doc.getElementsByTagName("entry");
 			for(int i = 0; i < entries.getLength(); i++) {
 				Paper p = new Paper();
 				p.venue = "";
-				p.type = "Article";
+				p.type = "Generic";
 				
 				Element entry = (Element) entries.item(i);
 				
@@ -47,7 +47,7 @@ public class ArXivConnectionManager {
 				for(int j = 0; j < authors.getLength(); j++) {
 					Element author = (Element) authors.item(j);
 					Element authorName = (Element) author.getElementsByTagName("name").item(0);
-					authorNames[j] = title.getTextContent();
+					authorNames[j] = authorName.getTextContent();
 				}
 				p.authors = authorNames;
 				
@@ -80,7 +80,32 @@ public class ArXivConnectionManager {
 		return null;
 	}
 	
+	private String buildSearch(String all, String ti, String au) {
+		StringBuilder term = new StringBuilder();
+		boolean alle = true, tie = true;
+		if(all == null || all.equals(""))
+			alle = false;
+		else term.append("all:" + all);
+		
+		if(ti == null || ti.equals(""))
+			tie = false;
+		else {
+			if(alle)
+				term.append("+AND+");
+			term.append("ti:"+ti);
+		}
+		
+		if(au != null && !au.equals("")) {
+			if(alle || tie)
+				term.append("+AND+");
+			term.append("au:"+au);
+		}
+	
+		return term.toString();
+	}
+	
 	public static void main(String[] args) {
-		new ArXivConnectionManager().search("Siek",10);
+		for(Paper p : new ArXivConnectionManager().search("","Funargs","Vitousek",10))
+			System.out.println(p.toJSON().toString());
 	}
 }

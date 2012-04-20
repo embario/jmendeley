@@ -19,12 +19,13 @@ public class Main {
 		// 
 		AuthenticationManager am = AuthenticationManager.getInstance(CONSUMER_KEY, CONSUMER_SECRET);
 		if (am.connectToMendeley() == true){
-			
 			//Create the AccountManager singleton that will use the AuthenticationManager to search
 			//for the profile information (Account) for the authenticated user.
 			AccountManager acm = AccountManager.getInstance(am);			
 			System.out.println(acm);
 			
+			SearchManager sm = SearchManager.getInstance(acm, am);
+			sm.search();
 		}
 	}
 	
