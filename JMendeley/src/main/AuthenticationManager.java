@@ -167,6 +167,18 @@ public class AuthenticationManager {
 		 
 	 }
 	 
+	 /**
+	  * This method accepts a OAuthRequest object
+	  * for an intended request to the Mendeley API.
+	  * @param request
+	  * @return
+	  */
+	 public Response sendRequest (OAuthRequest request){
+		 this._oauthService.signRequest(this._accessToken, request);
+		 return request.send();
+		 
+	 }
+	 
 
 	public void testDownloads() {
 		// Request my document library ids and sign with access token
