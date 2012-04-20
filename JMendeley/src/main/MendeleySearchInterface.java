@@ -7,7 +7,7 @@ import java.util.List;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 
-public class MendeleySearchInterface implements LibrarySearchInterface {
+public class MendeleySearchInterface implements ConnectionStrategy {
 	
 	/** Our singleton object **/
 	private static MendeleySearchInterface _singleton = null;

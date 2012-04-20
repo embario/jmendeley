@@ -21,7 +21,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class ArXivSearchInterface implements LibrarySearchInterface {
+public class ArXivSearchInterface implements ConnectionStrategy {
 	
 	/** Our singleton object **/
 	private static ArXivSearchInterface _singleton = null;

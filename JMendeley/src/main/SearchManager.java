@@ -32,7 +32,7 @@ public class SearchManager {
 	/** our Singleton Manager **/
 	private static SearchManager _singleton;
 	/** The references to LibrarySearchInterfaces **/
-	private LibrarySearchInterface arXiv, mendeley;
+	private ConnectionStrategy arXiv, mendeley;
 	/** Our reference to the singleton AccountManager **/
 	private AccountManager acm;
 	/** Our reference to the singleton Authentication Manager **/
@@ -67,7 +67,7 @@ public class SearchManager {
 		Scanner scn = new Scanner(System.in);
 		System.out.println("Type 'm' if you want to search Mendeley. Type 'a' if you want to search arXiv.");
 		String choice = scn.nextLine();
-		LibrarySearchInterface search = null;
+		ConnectionStrategy search = null;
 		//if(choice.equalsIgnoreCase)
 		
 		System.out.println("Please enter your search term.");
