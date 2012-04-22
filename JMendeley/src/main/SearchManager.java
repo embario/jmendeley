@@ -64,7 +64,7 @@ public class SearchManager {
 	}
 
 	
-	public void searchForPapers() {
+	public void searchForPapers() throws JSONException {
 		
 		Scanner scn = new Scanner(System.in);
 		System.out.print("Please enter your search term: ");
