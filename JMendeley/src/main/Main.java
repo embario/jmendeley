@@ -16,15 +16,20 @@ public class Main {
 		// start up UI, ask user for info, etc
 		// for now, just connect to the mand
 		
-		// 
+		//Instantiate the singleton Authentication Manager
 		AuthenticationManager am = AuthenticationManager.getInstance(CONSUMER_KEY, CONSUMER_SECRET);
+		
 		if (am.connectToMendeley() == true){
+			
 			//Create the AccountManager singleton that will use the AuthenticationManager to search
 			//for the profile information (Account) for the authenticated user.
 			AccountManager acm = AccountManager.getInstance(am);			
 			System.out.println(acm);
 			
+			//Instantiate the singleton Search Manager that is responsible for preparing and performing API searches.
 			SearchManager sm = SearchManager.getInstance(acm, am);
+			
+			//search using the API connectors.
 			sm.searchForPapers();
 		}
 	}

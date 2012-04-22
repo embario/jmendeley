@@ -20,6 +20,7 @@ import org.scribe.model.Verb;
 
 import com.google.common.io.ByteStreams;
 
+import util.MendeleyApiUrls;
 import util.SHASum;
 
 /**
@@ -120,16 +121,17 @@ public class SearchManager {
 					String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTR-8").replace("+", "%20");
 					
 					//Craft the response, POST-it to Mendeley, and get the Document ID back.
-					Response response = am.sendRequest(Verb.POST, "http://api.mendeley.com/oapi/library/documents?document=" + encodedURL);
+					Response response = am.sendRequest(Verb.POST, MendeleyApiUrls.MENDElEY_POST_DOCUMENT_URL + encodedURL);
 					JSONObject docIDObj = new JSONObject(response.getBody());
 					String id = docIDObj.getString("document_id");
 					
 					//Download the PDF, compute SHA checksum.
 				    byte[] fileBytes = ByteStreams.toByteArray(p.pdf.openStream());
 				    String sha = SHASum.SHASum(fileBytes);
-					
-				    //Now, send off the PDF bytes off to specified document PUT request along with its SHA checksum.
-					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format("http://www.mendeley.com/oapi/library/documents/%s/",id));
+
+				    //Now, send off the PDF bytes off to specified document PUT request.
+					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(MendeleyApiUrls.MENDELEY_PUT_DOCUMENT_PDF_URL,id));
+
 					request.addOAuthParameter("oauth_body_hash", sha);
 					request.addPayload(fileBytes);
 					response = am.sendRequest(request);
