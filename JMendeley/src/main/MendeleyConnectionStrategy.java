@@ -2,8 +2,12 @@ package main;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 
@@ -27,9 +31,55 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	 */
 	public List<Paper> search(String searchTerm, String title, String author, int maxResults) {
 		
-		String searchURL = String.format("http://api.mendeley.com/oapi/documents/search/%s/?items=%d&consumer_key=cfc24e1782a13e619030a531177df76504f811506", buildSearch(searchTerm, title, author), maxResults);
-		System.out.println(searchURL);
+		String searchURL = String.format("http://api.mendeley.com/oapi/documents/search/%s/?items=%d", buildSearch(searchTerm, title, author), maxResults);
+
 		Response response = auth.sendPublicRequest(Verb.GET, searchURL);
+		
+		ArrayList<Paper> papers = new ArrayList<Paper>(maxResults);
+		
+		try {
+			JSONObject results = new JSONObject(response.getBody());
+			JSONArray documents = results.getJSONArray("documents");
+			for(int i = 0; i < documents.length(); i++) {
+				JSONObject doc = documents.getJSONObject(i);
+				String uuid = doc.getString("uuid");
+				String docURL = String.format("http://api.mendeley.com/oapi/documents/details/%s/", uuid);
+				
+				response = auth.sendPublicRequest(Verb.GET, docURL);
+				
+				doc = new JSONObject(response.getBody());
+				Paper p = new Paper();
+				
+				if(doc.has("abstract"))
+					p.abst = doc.getString("abstract");
+				
+				JSONArray authors = doc.getJSONArray("authors");
+				String[] docAuthors = new String[authors.length()];
+				for(int j = 0; j < authors.length(); j++) {
+					JSONObject docAuthor = authors.getJSONObject(i);
+					docAuthors[j] = docAuthor.getString("forename") + " " + docAuthor.getString("surname");
+				}
+				p.authors = docAuthors;
+				
+				p.title = doc.getString("title");
+				
+				if(doc.has("publication_outlet")) {
+					p.venue = doc.getString("publication_outlet");
+					p.type = "Journal Article";
+				} else p.type = "Generic";
+				
+				p.year = doc.getString("year");
+				
+				
+				System.out.println(response.getBody());
+			}
+			
+			
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		System.out.println(response.getBody());
 		

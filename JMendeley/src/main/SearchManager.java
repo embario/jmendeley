@@ -124,11 +124,11 @@ public class SearchManager {
 					JSONObject docIDObj = new JSONObject(response.getBody());
 					String id = docIDObj.getString("document_id");
 					
-					//Convert the PDF to bytes, encrypt with SHA.
+					//Download the PDF, compute SHA checksum.
 				    byte[] fileBytes = ByteStreams.toByteArray(p.pdf.openStream());
 				    String sha = SHASum.SHASum(fileBytes);
 					
-				    //Now, send off the PDF bytes off to specified document PUT request.
+				    //Now, send off the PDF bytes off to specified document PUT request along with its SHA checksum.
 					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format("http://www.mendeley.com/oapi/library/documents/%s/",id));
 					request.addOAuthParameter("oauth_body_hash", sha);
 					request.addPayload(fileBytes);
