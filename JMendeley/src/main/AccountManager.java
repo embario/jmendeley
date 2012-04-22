@@ -5,6 +5,8 @@ import org.json.JSONObject;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 
+import util.MendeleyApiUrls;
+
 public class AccountManager {
 	
 	/** Our singleton object **/
@@ -45,7 +47,7 @@ public class AccountManager {
 	 private Account requestAccount() throws JSONException{
 		 
 		//Get the response back in this object.
-		 Response response = this._authManager.sendRequest(Verb.GET, "http://api.mendeley.com/oapi/profiles/info/me/");
+		 Response response = this._authManager.sendRequest(Verb.GET, MendeleyApiUrls.MENDELEY_GET_PROFILE_INFO_URL);
 		 
 		 Account result = null;
 		 int statusCode = response.getCode();
