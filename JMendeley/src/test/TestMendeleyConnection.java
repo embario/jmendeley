@@ -27,8 +27,6 @@ public class TestMendeleyConnection {
 		//Not yet connected.
 		Assert.assertFalse(am.isConnected());
 		
-		assert(true);
-		
 		//Connect.
 		Assert.assertTrue(am.connectToMendeley());
 		
