@@ -6,6 +6,8 @@ import java.io.IOException;
 import junit.framework.Assert;
 
 import main.AuthenticationManager;
+import main.ConnectionStrategy;
+import main.MendeleyConnectionStrategy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,35 +24,56 @@ public class TestAuthenticationManager {
 	public void setup() throws FileNotFoundException, IOException{
 		
 		am = AuthenticationManager.getInstance(AllTests.CONSUMER_KEY, AllTests.CONSUMER_SECRET);
+		am.connectToMendeley();
 	}
 	
 	
 	@Test
-	public void testBadPublicRequest() throws FileNotFoundException, IOException {
+	public void testBadRequests() throws FileNotFoundException, IOException {
 		
-		am.connectToMendeley();
+		Response response = null;
+		int statusCode = 0;
 		
-		Response response = am.sendPublicRequest(Verb.GET, "Failing test");
+		//A completely useless request - will throw an OAuthException.
+		response = am.sendPublicRequest(Verb.GET, "Failing test");
+		Assert.assertTrue(response == null);
 		
+		//A public request that seeks details for a ridiculous document id.
+		response = am.sendPublicRequest(Verb.GET, String.format(MendeleyApiUrls.PUBLIC_GET_DOCUMENT_DETAILS, "0000"));
 		Assert.assertFalse(response.isSuccessful());
-		int statusCode = response.getCode();
-		Assert.assertTrue(statusCode != 200 && (statusCode == 404 || statusCode == 401));
-		System.out.println("Unsuccessful response body: " + response.getBody());
+		statusCode = response.getCode();
+		Assert.assertTrue(statusCode != 200 && (statusCode == 400 || statusCode == 404 || statusCode == 401 || statusCode == 500));
+		
+		//Now, a request that attempts to fetch user profile info but is appended with 'bad'. 
+		response = am.sendRequest(Verb.GET, MendeleyApiUrls.USER_GET_PROFILE_INFO_URL + "bad");
+		Assert.assertFalse(response.isSuccessful());
+		statusCode = response.getCode();
+		Assert.assertTrue(statusCode != 200 && (statusCode == 400 || statusCode == 404 || statusCode == 401 || statusCode == 500));
 		
 	}
 	
-	
 	@Test
-	public void tesetGoodPublicRequest() throws FileNotFoundException, IOException {
+	public void testGoodRequests() throws FileNotFoundException, IOException {
 		
-		am.connectToMendeley();
+		Response response = null;
+		int statusCode = 0;
+		ConnectionStrategy cs = null;
 		
-		Response response = am.sendPublicRequest(Verb.GET, MendeleyApiUrls.MENDELEY_GET_PROFILE_INFO_URL);
-		
+		//Attempt to request for user profile info. Should always succeed.
+		response = am.sendRequest(Verb.GET, MendeleyApiUrls.USER_GET_PROFILE_INFO_URL);
 		Assert.assertTrue(response.isSuccessful());
-		int statusCode = response.getCode();
+		statusCode = response.getCode();
 		Assert.assertTrue(statusCode == 200);
-		System.out.println("Successful response body " + response.getBody());
+		
+		cs = new MendeleyConnectionStrategy (am);
+		response = am.sendPublicRequest(Verb.GET, 
+				String.format(MendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, cs.buildSearch("Something", null, null), 10));
+		Assert.assertTrue(response.isSuccessful());
+		statusCode = response.getCode();
+		Assert.assertTrue(statusCode == 200);
+		
+		
+		
 	}
 
 }

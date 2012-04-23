@@ -2,7 +2,6 @@ package main;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -10,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
+
+import util.MendeleyApiUrls;
 
 public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	
@@ -32,11 +33,9 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	 */
 	public List<Paper> search(String searchTerm, String title, String author, int maxResults) throws JSONException {
 	
-		String searchURL = String.format("http://api.mendeley.com/oapi/documents/search/%s/?items=%d", buildSearch(searchTerm, title, author), maxResults);
+		String searchURL = String.format(MendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, buildSearch(searchTerm, title, author), maxResults);
 
 		Response response = auth.sendPublicRequest(Verb.GET, searchURL);
-		JSONObject json = new JSONObject(response.getBody());	
-		ArrayList<Paper> papers = new ArrayList<Paper>(maxResults);
 		
 		try {
 			JSONObject results = new JSONObject(response.getBody());
@@ -44,7 +43,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 			for(int i = 0; i < documents.length(); i++) {
 				JSONObject doc = documents.getJSONObject(i);
 				String uuid = doc.getString("uuid");
-				String docURL = String.format("http://api.mendeley.com/oapi/documents/details/%s/", uuid);
+				String docURL = String.format(MendeleyApiUrls.PUBLIC_GET_DOCUMENT_DETAILS, uuid);
 				
 				response = auth.sendPublicRequest(Verb.GET, docURL);
 				
@@ -77,13 +76,9 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 			
 			
 			
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (JSONException e) { e.printStackTrace(); }
 		
 		System.out.println(response.getBody());
-		
 		return null;
 	}
 	

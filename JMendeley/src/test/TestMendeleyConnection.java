@@ -52,14 +52,13 @@ public class TestMendeleyConnection {
 	@Test
 	public void testInvalidVerID() throws FileNotFoundException, IOException{
 		
-		//Assert.assertFalse(am.isConnected());
-		
 		//Delete the token file.
 		File file = new File("./usr/jmendeley_token");
 		file.delete();
 		
 		//Now input an incorrect verification code; this should fail;
 		Assert.assertFalse(am.connectToMendeley());
+		Assert.assertFalse(am.isConnected());
 	}
 
 }

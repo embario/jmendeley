@@ -47,7 +47,7 @@ public class AccountManager {
 	 private Account requestAccount() throws JSONException{
 		 
 		//Get the response back in this object.
-		 Response response = this._authManager.sendRequest(Verb.GET, MendeleyApiUrls.MENDELEY_GET_PROFILE_INFO_URL);
+		 Response response = this._authManager.sendRequest(Verb.GET, MendeleyApiUrls.USER_GET_PROFILE_INFO_URL);
 		 
 		 Account result = null;
 		 int statusCode = response.getCode();

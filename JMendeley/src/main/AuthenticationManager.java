@@ -31,14 +31,17 @@ public class AuthenticationManager {
 
 	/** Our Singleton Manager **/
 	private static AuthenticationManager _singleton = null;
+	
+	/** File that contains the Access Token and Access secret for signing user-specific 
+	 * method requests when interfacing with the Mendeley API **/
+	private File _token_file = null;
+	/** Location of the JMendeley Token File **/
+	protected static final String TOKEN_FILE_NAME = "./usr/jmendeley_token";
 
 	/** Consumer Key is used to retrieve the Access Token when authenticating a User for Mendeley access. **/
 	private String _consumer_key = null;
 	/** Consumer Secret is used for verifying the consumer key. **/
 	private String _consumer_secret = null;
-	/** File that contains the Access Token and Access secret for signing user-specific 
-	 * method requests when interfacing with the Mendeley API **/
-	private File _token_file = null;
 	/** Flag for determining if connection has been made already **/
 	private boolean _isConnected = false;
 
@@ -47,7 +50,6 @@ public class AuthenticationManager {
 	/** The access token for signing method requests **/
 	private Token _accessToken = null;
 	
-
 	// Utility variables
 	private Scanner _infile = null;
 
@@ -87,7 +89,7 @@ public class AuthenticationManager {
 		Token token_file = null;
 
 		// Refer to the Token file; check if it exists
-		File tokenfile = this._token_file = new File("./usr/jmendeley_token");
+		File tokenfile = this._token_file = new File(AuthenticationManager.TOKEN_FILE_NAME);
 
 		try {
 
@@ -161,10 +163,18 @@ public class AuthenticationManager {
 	  */
 	 public Response sendPublicRequest (Verb verb, String apiURL){
 		 
-		 OAuthRequest request = new OAuthRequest (verb, apiURL);
-		 request.addQuerystringParameter("consumer_key", _consumer_key);
-		 return request.send();
-		 
+		 try {
+		
+			 OAuthRequest request = new OAuthRequest (verb, apiURL);
+			 request.addQuerystringParameter("consumer_key", _consumer_key);
+			 Response response = request.send();
+			 return response;
+			 
+		 } catch (OAuthException oauth){ 
+			 System.err.println(oauth);
+			 return null;
+			 
+		 }
 	 }
 	 
 	 
