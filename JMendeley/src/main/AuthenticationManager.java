@@ -187,10 +187,17 @@ public class AuthenticationManager {
 	  */
 	 public Response sendRequest (Verb verb, String apiURL){
 		 
-		 OAuthRequest request = new OAuthRequest (verb, apiURL);
-		 this._oauthService.signRequest(this._accessToken, request);
-		 return request.send();
-		 
+		 try {
+			 
+			 OAuthRequest request = new OAuthRequest (verb, apiURL);
+			 this._oauthService.signRequest(this._accessToken, request);
+			 Response response = request.send();
+			 return response;
+			 
+		 } catch (OAuthException oauth){
+			 System.err.println(oauth);
+			 return null;
+		 }
 	 }
 	 
 	 /**
