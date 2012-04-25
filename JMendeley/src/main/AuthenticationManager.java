@@ -6,6 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +41,7 @@ public class AuthenticationManager {
 	private File _token_file = null;
 	/** Location of the JMendeley Token File **/
 	protected static final String TOKEN_FILE_NAME = "./usr/jmendeley_token";
+	
 
 	/** Consumer Key is used to retrieve the Access Token when authenticating a User for Mendeley access. **/
 	private String _consumer_key = null;
@@ -49,6 +54,9 @@ public class AuthenticationManager {
 	private OAuthService _oauthService = null;
 	/** The access token for signing method requests **/
 	private Token _accessToken = null;
+	
+	private JFrame _verificationCodeFrame = null;
+	private static final String MENDELEY_ICON = "./img/mendeley.png";
 	
 	// Utility variables
 	private Scanner _infile = null;
@@ -123,16 +131,22 @@ public class AuthenticationManager {
 		// Retrieve the URL for Mendeley authorization, direct user there,
 		// wait for response, construct verifier
 		String authURL = this._oauthService.getAuthorizationUrl(requestToken);
-		System.out.println("Go to " + authURL);
-		System.out.print("Enter verification code: ");
-		Verifier verify = new Verifier(this._infile.nextLine());
-
-		try { token_file = this._oauthService.getAccessToken(requestToken, verify); }
-		catch (OAuthException oaex) {
+		boolean verified = false;
+		String verificationCode = null;
+		Verifier verify = null;
+		
+		while (verified == false){
 			
-			System.err.println("The Token File is incomplete/corrupt. Please make sure that the verification code is entered correctly.");
-			this._isConnected = false;
-			return false;
+			verificationCode = popupVerificationCodeDialog(authURL);
+			verify = null;
+			
+			try { 
+				
+				verify = new Verifier(verificationCode);
+				token_file = this._oauthService.getAccessToken(requestToken, verify); 
+				verified = true;
+			} catch (Exception e){ JOptionPane.showMessageDialog(this._verificationCodeFrame, "Please enter a correct verification code.");} 
+			
 		}
 		
 		// Print token information to file.
@@ -146,7 +160,23 @@ public class AuthenticationManager {
 		return true;
 	}
 
-	 public static AuthenticationManager getInstance(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
+	 private String popupVerificationCodeDialog(String authURL) {
+		 
+		//Prompt the user for the verification code.
+		ImageIcon icon = new ImageIcon ("./img/mendeley.png");
+		String verificationCode = (String) JOptionPane.showInputDialog(this._verificationCodeFrame, 
+				"Go to the URL shown below and enter the verification code in the text field.", 
+				"Enter Mendeley Verification Code",
+				JOptionPane.PLAIN_MESSAGE,
+				icon,
+				null,
+				authURL);
+		
+		return verificationCode;
+	 
+	 }
+
+	public static AuthenticationManager getInstance(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
 		
 		if (_singleton == null)
 			_singleton = new AuthenticationManager (consumer_key, consumer_secret);
