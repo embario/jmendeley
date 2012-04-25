@@ -23,6 +23,7 @@ public class SearchView implements ActionListener, ListSelectionListener{
 	
 	/** The container for the UI **/
 	private JFrame _frame = null;
+	private JPanel _panel = null;
 	
 	
 	private SearchView (SearchManager sm){
@@ -31,7 +32,9 @@ public class SearchView implements ActionListener, ListSelectionListener{
 		
 		//Instantiate the GUI.
 		this._frame = new JFrame("JMendeley");
-		this._frame.setLayout(new BorderLayout());
+		this._panel = new JPanel();
+		this._panel.setLayout(new BorderLayout());
+		//this._frame.setLayout(new BorderLayout());
 		this._frame.setBounds(800, 600, 800, 600);
 		
 		//North Panel
@@ -53,6 +56,8 @@ public class SearchView implements ActionListener, ListSelectionListener{
 		
 		this._frame.add(northPanel, BorderLayout.PAGE_START);
 		this._frame.add(centerPanel, BorderLayout.CENTER);
+		
+		this._frame.add(this._panel);
 		this._frame.setVisible(true);
 		this._frame.setFocusable(true);
 				
