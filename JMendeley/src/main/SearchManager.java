@@ -46,6 +46,9 @@ public class SearchManager {
 	private AccountManager acm;
 	/** Our reference to the singleton Authentication Manager **/
 	private AuthenticationManager am;
+	
+	/** Flag for flipping concurrency on/off **/
+	private boolean _concurrent = true;
 
 	private SearchManager(AccountManager acm, AuthenticationManager am) {
 		this.acm = acm;
@@ -118,7 +121,7 @@ public class SearchManager {
 		}
 	}
 
-	boolean concurrent = true;
+
 
 	private boolean sendPapersToMendeley(Scanner scn, List<Paper> papers) throws InterruptedException, ExecutionException {
 
@@ -126,21 +129,37 @@ public class SearchManager {
 
 		long init = 0;
 		String answer = scn.nextLine();
-		if (answer.equalsIgnoreCase("yes") && concurrent) {
+		
+		//If we want to send papers...
+		if (answer.equalsIgnoreCase("yes") && this._concurrent) {
+			
+			//Start the timer.
 			init = System.currentTimeMillis();
+			
+			//Separate the Papers with PDFS from those without them.
 			ArrayList<Paper> pdfPapers = new ArrayList<Paper>(papers.size());
-			for (Paper p : papers) {
+			
+			for (Paper p : papers) 
 				if(p.pdf != null)
 					pdfPapers.add(p);
-			}
+			
+			/*
+			 * Concurrency: 
+			 * 
+			 * 1) Download PDFs
+			 * 2) Calculate SHA-1 for all PDFs
+			 * 3) Upload PDFs to Mendeley Account
+			 * 
+			 */
 
+			//Prepare to concurrently download PDFs.
 			int numCores = Runtime.getRuntime().availableProcessors();
-
 			double blockingCoefficientDownload = 0.9;
 			int downloadPoolSize = (int) (numCores / (1. - blockingCoefficientDownload));
+			
 			List<Callable<Void>> downloadTasks = new ArrayList<Callable<Void>>(pdfPapers.size());
 
-
+			//The work for downloading the PDFs
 			for(final Paper p : pdfPapers) {
 				downloadTasks.add(new Callable<Void>() {
 					public Void call() throws Exception {
@@ -153,18 +172,21 @@ public class SearchManager {
 
 			System.out.println("Downloading PDFs...");
 
+			//The ExecutorService for concurrently downloading the PDFs
 			final ExecutorService downloadExecutorPool = Executors.newFixedThreadPool(downloadPoolSize);
 			final List<Future<Void>> downloadResults = downloadExecutorPool.invokeAll(downloadTasks, 10000, TimeUnit.SECONDS);
-
-			for(final Future<Void> result : downloadResults) {
+			
+			for(final Future<Void> result : downloadResults)
 				result.get();
-			}
+			
 
 			System.out.println("PDFs downloaded...");
 
+			//Then, prepare to concurrently calculate SHA-1s.
 			int shaPoolSize = numCores;
 			List<Callable<Void>> shaTasks = new ArrayList<Callable<Void>>(pdfPapers.size());
 
+			//The work for concurrently calculating SHA-1s
 			for(final Paper p : pdfPapers) {
 				shaTasks.add(new Callable<Void>() {
 					public Void call() throws Exception {
@@ -177,22 +199,26 @@ public class SearchManager {
 
 			System.out.println("Calculating SHA1s...");
 
+			//The ExecutorService for concurrently calculating SHA-1s.
 			final ExecutorService shaExecutorPool = Executors.newFixedThreadPool(shaPoolSize);
 			final List<Future<Void>> shaResults = shaExecutorPool.invokeAll(shaTasks, 10000, TimeUnit.SECONDS);
 
-			for(final Future<Void> result : shaResults) {
+			for(final Future<Void> result : shaResults)
 				result.get();
-			}
+			
 
 			System.out.println("SHA1s calculated...");
 
+			//Finally, prepare for concurrently uploading PDFs.
 			double blockingCoefficientUpload = 0.9;
 			int uploadPoolSize = (int) (numCores / (1. - blockingCoefficientUpload));
 			List<Callable<Response>> uploadTasks = new ArrayList<Callable<Response>>(papers.size());
 
+			//The work for concurrently uploading PDFs.
 			for(final Paper p : papers) {
 				uploadTasks.add(new Callable<Response>() {
 					public Response call() throws Exception {
+						
 						//First, encode the paper JSON Object for the URL.
 						String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTF-8").replace("+", "%20");
 
@@ -219,18 +245,20 @@ public class SearchManager {
 
 			System.out.println("Uploading paper information...");
 
+			//The ExecutorService for concurrently uploading PDFs.
 			final ExecutorService uploadExecutorPool = Executors.newFixedThreadPool(uploadPoolSize);
 			final List<Future<Response>> uploadResults = uploadExecutorPool.invokeAll(uploadTasks, 10000, TimeUnit.SECONDS);
 
-			for(final Future<Response> result : uploadResults) {
-				Response response = result.get();
-			}
+			for(final Future<Response> result : uploadResults) 
+				result.get();
 
 			System.out.println("Paper information uploaded. Process complete.");
 
 			//return true;
-		} else if(answer.equalsIgnoreCase("yes") && !concurrent) {
-			System.out.println("proceeding on slow path");
+			
+		} else if(answer.equalsIgnoreCase("yes") && this._concurrent == false) {
+			
+			System.out.println("proceeding on slow (sequential) path");
 			init = System.currentTimeMillis();
 			for (Paper p : papers) {
 
