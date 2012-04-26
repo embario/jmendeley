@@ -34,10 +34,13 @@ public class Main {
 			
 			if (acm.getAccount() == null){
 				 
-				JMendeleyUIUtils.showMessageDialog("Account unable to be retrieved. Please delete the JMendeley token file and restart the application.", 
-						"Fatal Error", JOptionPane.ERROR_MESSAGE);
+				JMendeleyUIUtils.showMessageDialog("Account unable to be retrieved. You will be re-prompted to sign into Mendeley.", 
+						"Corrupted JMendeley Token File", JOptionPane.WARNING_MESSAGE);
+				am.deleteFile();
 				
-				System.exit(1);
+				//Restart the main function.
+				main(args);
+				return;
 			}
 			
 			//Instantiate the singleton Search Manager that is responsible for preparing and performing API searches.
@@ -47,7 +50,10 @@ public class Main {
 			
 			//search using the API connectors.
 			//sm.searchForPapers();
-		}
+			
+		}//end main
+		else
+			System.exit(1);
 	}
 	
 }

@@ -53,21 +53,24 @@ public class SearchView implements ActionListener {
 		this._panel.setLayout(new BorderLayout());
 		this._frame.setBounds(800, 600, 800, 600);
 		
-		//North Panel
-		JPanel northPanel = this._profilePanel = new JPanel();
-		northPanel.setBorder(BorderFactory.createLineBorder(Color.red));
+		/** GUI is split in two panels - east and west panels. **/
+		//East Panel - will hold the search results panel
+		JPanel eastPanel = new JPanel();
+		eastPanel.setLayout(new BorderLayout());
 		
-		//Center Panel
-		JPanel centerPanel = new JPanel();
-		centerPanel.setLayout(new BorderLayout());
+		//West Panel - will hold profile and search panels
+		JPanel westPanel = new JPanel();
+		westPanel.setLayout(new GridLayout(2,1));
 		
-		//Search Panel Configuration
-		JPanel searchPanel = this._searchPanel = new JPanel();
-		searchPanel.setLayout(new GridLayout(2,0,0,5));
+		/** West Panel is split in two panels - profile an search panels **/
+		
+		//Search Panel Configuration - splits search panel by separating the text field elements from the action elements.
+		JPanel searchPanel = new JPanel();
+		searchPanel.setLayout(new GridLayout(2,0));
 		searchPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
 		
 		//Search Bar
-		JTextField searchBar = this._searchBar = new JTextField(3);
+		JTextField searchBar = this._searchBar = new JTextField();
 		searchBar.setPreferredSize(new Dimension(100, 40));
 		JLabel searchBarLabel = new JLabel ("Search:", JLabel.TRAILING);
 		searchBarLabel.setLabelFor(searchBar);
@@ -78,16 +81,16 @@ public class SearchView implements ActionListener {
 		searchButton.setPreferredSize(new Dimension(200,40));
 		
 		//Title Field
-		JTextField titleField = this._titleField = new JTextField(3);
+		JTextField titleField = this._titleField = new JTextField();
 		JLabel titleFieldLabel = new JLabel("Title:", JLabel.TRAILING);
 		titleFieldLabel.setLabelFor(titleField);
 		
 		//Author Field
-		JTextField authorField = this._authorField = new JTextField(3);
+		JTextField authorField = this._authorField = new JTextField();
 		JLabel authorFieldLabel = new JLabel("Author:", JLabel.TRAILING);
 		authorFieldLabel.setLabelFor(authorField);
 		
-		//Panel that holds API checkboxes.
+		//apiPanel configuration - Panel that holds API checkboxes.
 		JPanel apiPanel = this._apiBoxPanel = new JPanel();
 		apiPanel.setBackground(Color.gray);
 		
@@ -137,7 +140,6 @@ public class SearchView implements ActionListener {
 		JPanel resultsPanel = new JPanel();
 		resultsPanel.setBorder(BorderFactory.createLineBorder(Color.green));
 
-		this._panel.add(northPanel, BorderLayout.PAGE_START);
 		this._panel.add(searchPanel, BorderLayout.LINE_START);
 		this._panel.add(resultsPanel, BorderLayout.CENTER);
 		

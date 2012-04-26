@@ -80,6 +80,7 @@ public class AuthenticationManager {
 	}
 	
 	public boolean isConnected() { return this._isConnected;}
+	public boolean deleteFile(){ return this._token_file.delete();}
 
 	/**
 	 * 
