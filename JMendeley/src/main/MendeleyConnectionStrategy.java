@@ -69,7 +69,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 					p.type = "Journal Article";
 				} else p.type = "Generic";
 				
-				p.year = doc.getInt("year") + "";
+				p.year = doc.getString("year");
 				
 				papers.add(p);
 			}
