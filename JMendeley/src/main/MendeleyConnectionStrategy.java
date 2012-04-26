@@ -2,6 +2,7 @@ package main;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -36,7 +37,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 		String searchURL = String.format(MendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, buildSearch(searchTerm, title, author), maxResults);
 
 		Response response = auth.sendPublicRequest(Verb.GET, searchURL);
-		
+		ArrayList<Paper> papers = new ArrayList<Paper>();
 		try {
 			JSONObject results = new JSONObject(response.getBody());
 			JSONArray documents = results.getJSONArray("documents");
@@ -56,7 +57,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 				JSONArray authors = doc.getJSONArray("authors");
 				String[] docAuthors = new String[authors.length()];
 				for(int j = 0; j < authors.length(); j++) {
-					JSONObject docAuthor = authors.getJSONObject(i);
+					JSONObject docAuthor = authors.getJSONObject(j);
 					docAuthors[j] = docAuthor.getString("forename") + " " + docAuthor.getString("surname");
 				}
 				p.authors = docAuthors;
@@ -68,18 +69,14 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 					p.type = "Journal Article";
 				} else p.type = "Generic";
 				
-				p.year = doc.getString("year");
+				p.year = doc.getInt("year") + "";
 				
-				
-				System.out.println(response.getBody());
+				papers.add(p);
 			}
-			
-			
 			
 		} catch (JSONException e) { e.printStackTrace(); }
 		
-		System.out.println(response.getBody());
-		return null;
+		return papers;
 	}
 	
 	public  String buildSearch(String all, String title, String author) {
