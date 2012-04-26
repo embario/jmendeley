@@ -4,7 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
 import org.json.JSONException;
+
+import util.JMendeleyUIUtils;
 
 public class Main {
 	
@@ -27,7 +31,14 @@ public class Main {
 			//Create the AccountManager singleton that will use the AuthenticationManager to search
 			//for the profile information (Account) for the authenticated user.
 			AccountManager acm = AccountManager.getInstance(am);			
-			System.out.println(acm);
+			
+			if (acm.getAccount() == null){
+				 
+				JMendeleyUIUtils.showMessageDialog("Account unable to be retrieved. Please delete the JMendeley token file and restart the application.", 
+						"Fatal Error", JOptionPane.ERROR_MESSAGE);
+				
+				System.exit(1);
+			}
 			
 			//Instantiate the singleton Search Manager that is responsible for preparing and performing API searches.
 			SearchManager sm = SearchManager.getInstance(acm, am);

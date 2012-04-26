@@ -77,8 +77,8 @@ public class AccountManager {
 			 } catch (JSONException e){ System.err.println(e);}
 		 }//end if conditional
 		 
-		 //It didn't work - Throw the JSONException.
-		 throw new JSONException ("Status Code " + statusCode);
+		 //It didn't work - return null and handle.
+		 return null;
 	 }
 	
 	 

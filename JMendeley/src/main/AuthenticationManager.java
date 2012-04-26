@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.TrayIcon.MessageType;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -22,6 +23,7 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+import util.JMendeleyUIUtils;
 import util.MendeleyApi;
 
 
@@ -54,9 +56,6 @@ public class AuthenticationManager {
 	private OAuthService _oauthService = null;
 	/** The access token for signing method requests **/
 	private Token _accessToken = null;
-	
-	private JFrame _verificationCodeFrame = null;
-	private static final String MENDELEY_ICON = "./img/mendeley.png";
 	
 	// Utility variables
 	private Scanner _infile = null;
@@ -137,7 +136,7 @@ public class AuthenticationManager {
 		
 		while (verified == false){
 			
-			verificationCode = popupVerificationCodeDialog(authURL);
+			verificationCode = JMendeleyUIUtils.popupVerificationCodeDialog(authURL);
 			verify = null;
 			
 			//User confirmed to exit the program.
@@ -150,7 +149,8 @@ public class AuthenticationManager {
 				token_file = this._oauthService.getAccessToken(requestToken, verify); 
 				verified = true;
 				
-			} catch (Exception e){ JOptionPane.showMessageDialog(this._verificationCodeFrame, "Please enter a correct verification code.");} 
+			} catch (Exception e){ JMendeleyUIUtils.showMessageDialog("Please enter a correct verification code.",
+					"Incorrect verification code.", JOptionPane.INFORMATION_MESSAGE);} 
 			
 		}
 		
@@ -165,32 +165,6 @@ public class AuthenticationManager {
 		return true;
 	}
 
-	 private String popupVerificationCodeDialog(String authURL) {
-		 
-		//Prompt the user for the verification code.
-		ImageIcon icon = new ImageIcon (MENDELEY_ICON);
-		String verificationCode = (String) JOptionPane.showInputDialog(this._verificationCodeFrame, 
-				"Go to the URL shown below and enter the verification code in the text field.", 
-				"Enter Mendeley Verification Code",
-				JOptionPane.PLAIN_MESSAGE,
-				icon,
-				null,
-				authURL);
-		
-		//User pushed cancel intending to leave the application.
-		if (verificationCode == null){
-			
-			int answer = JOptionPane.showConfirmDialog(this._verificationCodeFrame, "Are you sure you want to exit JMendeley?", "Exit JMendeley", JOptionPane.YES_NO_OPTION);
-			if (answer != 1)
-				return null;
-			else
-				return this.popupVerificationCodeDialog(authURL);
-		}
-		
-		else
-			return verificationCode;
-	 
-	 }
 
 	public static AuthenticationManager getInstance(String consumer_key, String consumer_secret) throws FileNotFoundException, IOException {
 		
