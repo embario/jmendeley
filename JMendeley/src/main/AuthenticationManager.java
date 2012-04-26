@@ -140,11 +140,16 @@ public class AuthenticationManager {
 			verificationCode = popupVerificationCodeDialog(authURL);
 			verify = null;
 			
+			//User confirmed to exit the program.
+			if (verificationCode == null)
+				return false;
+			
 			try { 
 				
 				verify = new Verifier(verificationCode);
 				token_file = this._oauthService.getAccessToken(requestToken, verify); 
 				verified = true;
+				
 			} catch (Exception e){ JOptionPane.showMessageDialog(this._verificationCodeFrame, "Please enter a correct verification code.");} 
 			
 		}
@@ -163,7 +168,7 @@ public class AuthenticationManager {
 	 private String popupVerificationCodeDialog(String authURL) {
 		 
 		//Prompt the user for the verification code.
-		ImageIcon icon = new ImageIcon ("./img/mendeley.png");
+		ImageIcon icon = new ImageIcon (MENDELEY_ICON);
 		String verificationCode = (String) JOptionPane.showInputDialog(this._verificationCodeFrame, 
 				"Go to the URL shown below and enter the verification code in the text field.", 
 				"Enter Mendeley Verification Code",
@@ -172,7 +177,18 @@ public class AuthenticationManager {
 				null,
 				authURL);
 		
-		return verificationCode;
+		//User pushed cancel intending to leave the application.
+		if (verificationCode == null){
+			
+			int answer = JOptionPane.showConfirmDialog(this._verificationCodeFrame, "Are you sure you want to exit JMendeley?", "Exit JMendeley", JOptionPane.YES_NO_OPTION);
+			if (answer != 1)
+				return null;
+			else
+				return this.popupVerificationCodeDialog(authURL);
+		}
+		
+		else
+			return verificationCode;
 	 
 	 }
 

@@ -91,8 +91,7 @@ public class SearchManager {
 			connections.add(new ArXivConnectionStrategy());
 
 		ArrayList <Paper> papers = new ArrayList <Paper> ();
-
-		//Let the concurrency begin (here).
+		
 		for (ConnectionStrategy s : connections){
 
 			ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(searchTerm, null, null, maxResults);
@@ -113,12 +112,10 @@ public class SearchManager {
 		}
 
 		try {
+			//Let the concurrency begin (here).
 			sendPapersToMendeley(scn, papers);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
+			
+		} catch (Exception e) { e.printStackTrace();}
 	}
 
 

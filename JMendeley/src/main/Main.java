@@ -35,7 +35,7 @@ public class Main {
 			SearchView view = SearchView.getInstance(sm);
 			
 			//search using the API connectors.
-			sm.searchForPapers();
+			//sm.searchForPapers();
 		}
 	}
 	
