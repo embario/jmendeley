@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import util.JMendeleyApiUrls;
 import util.JMendeleyUIUtils;
 import util.SpringUtilities;
 
@@ -44,14 +45,14 @@ public class SearchView implements ActionListener {
 	
 	//Search Panel elements
 	private JPanel _searchPanel = null;
+	private JPanel _searchFieldsPanel;
+	private JPanel _apiBoxPanel = null;
 	private JButton _searchButton = null;
 	private JTextField _searchBarField = null;
-	private JPanel _apiBoxPanel = null;
 	private JTextField _titleField = null;
 	private JTextField _authorField = null;
 	private JTextField _yearField = null;
 	private JTextField _pubRefField = null;
-
 
 	
 	
@@ -134,7 +135,6 @@ public class SearchView implements ActionListener {
 		for (JLabel ri : accResearchInterests)
 			profilePanel.add(ri);
 		
-		
         SpringUtilities.makeCompactGrid(profilePanel, 7 + accResearchInterests.size() , 1, 10, 10, 5, 5);
 		
 		
@@ -142,6 +142,12 @@ public class SearchView implements ActionListener {
 		JPanel searchPanel = this._searchPanel = new JPanel();
 		searchPanel.setLayout(new GridLayout(2,0));
 		searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		
+		//First Panel for searchPanel
+		JPanel searchFieldsPanel = this._searchFieldsPanel = new JPanel();
+		searchFieldsPanel.setLayout(new SpringLayout());
+	
 		
 		//Search Bar
 		JTextField searchBar = this._searchBarField = new JTextField();
@@ -173,6 +179,21 @@ public class SearchView implements ActionListener {
 		JLabel pubFieldLabel = new JLabel ("Publication Reference:", JLabel.TRAILING);
 		pubFieldLabel.setLabelFor(pubField);
 		
+		searchFieldsPanel.add(searchBarLabel);
+		searchFieldsPanel.add(searchBar);
+		searchFieldsPanel.add(titleFieldLabel);
+		searchFieldsPanel.add(titleField);
+		searchFieldsPanel.add(authorFieldLabel);
+		searchFieldsPanel.add(authorField);
+		searchFieldsPanel.add(yearFieldLabel);
+		searchFieldsPanel.add(yearField);
+		searchFieldsPanel.add(pubFieldLabel);
+		searchFieldsPanel.add(pubField);
+		
+		//Lay out the panel.
+        SpringUtilities.makeCompactGrid(searchFieldsPanel, 5, 2, 10, 10, 5, 5);
+        
+		
 		//apiPanel configuration - Panel that holds API checkboxes.
 		JPanel apiPanel = this._apiBoxPanel = new JPanel();
 		apiPanel.setBackground(Color.gray);
@@ -188,29 +209,12 @@ public class SearchView implements ActionListener {
 		apiPanel.add(arxivBox);
 		apiPanel.add(mendBox);
 		
-		//First Panel for searchPanel
-		JPanel searchFieldsPanel = new JPanel();
-		searchFieldsPanel.setLayout(new SpringLayout());
-		
-		searchFieldsPanel.add(searchBarLabel);
-		searchFieldsPanel.add(searchBar);
-		searchFieldsPanel.add(titleFieldLabel);
-		searchFieldsPanel.add(titleField);
-		searchFieldsPanel.add(authorFieldLabel);
-		searchFieldsPanel.add(authorField);
-		searchFieldsPanel.add(yearFieldLabel);
-		searchFieldsPanel.add(yearField);
-		searchFieldsPanel.add(pubFieldLabel);
-		searchFieldsPanel.add(pubField);
-		
-		//Lay out the panel.
-        SpringUtilities.makeCompactGrid(searchFieldsPanel, 5, 2, 10, 10, 5, 5);
-		
+
+		//Layout the Search Actions Panel.
 		JPanel searchActionsPanel = new JPanel();
 		searchActionsPanel.setLayout(new SpringLayout());
-		
-		searchActionsPanel.add(apiPanel);
-		
+	
+		searchActionsPanel.add(apiPanel);	
 		searchActionsPanel.add(new JPanel());
 		searchActionsPanel.add(searchButton);
 		searchActionsPanel.add(new JPanel());
@@ -278,7 +282,7 @@ public class SearchView implements ActionListener {
 			
 			//Our list of search terms and refinements.
 			ArrayList <String> terms = new ArrayList <String> ();
-			Component [] textfields = this._searchPanel.getComponents();
+			Component [] textfields = this._searchFieldsPanel.getComponents();
 			
 			//Iterate through the components found in the searchPanel.
 			for (Component comp : textfields){
@@ -286,10 +290,22 @@ public class SearchView implements ActionListener {
 				if (comp instanceof JTextField == false)
 					continue;
 				
+				//It is one of our textfields.
 				JTextField field = (JTextField) comp;
+				String prefix = "";
+				if (field == this._searchBarField)
+					prefix += JMendeleyApiUrls.JMEND_SEARCH_TERM;
+				else if (field == this._authorField)
+					prefix += JMendeleyApiUrls.JMEND_AUTHOR_TERM;
+				else if (field == this._titleField)
+					prefix += JMendeleyApiUrls.JMEND_TITLE_TERM;
+				else if (field == this._yearField)
+					prefix += JMendeleyApiUrls.JMEND_YEAR_TERM;
+				else if (field == this._pubRefField)
+					prefix += JMendeleyApiUrls.JMEND_PUBREF_TERM;
 				
 				//Add the text to the terms list.
-				terms.add(field.getText());
+				terms.add(prefix + field.getText());
 			}
 			
 			//Our list of selected connection strategies.
@@ -312,9 +328,19 @@ public class SearchView implements ActionListener {
 		
 			}//end for loop
 			
-			ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections);
-			System.out.println(papers);
-		}
+			if (connections.isEmpty() == false){
+				
+				ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections);
+				System.out.println(papers);
+				
+			} else{
+				
+				JMendeleyUIUtils.showMessageDialog("Please select at least one digital library to search.", 
+						"No Digital Library Selected", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+
+		}//end if SEARCH
 		
 	}
 

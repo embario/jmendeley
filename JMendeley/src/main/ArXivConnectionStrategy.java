@@ -33,11 +33,11 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 	 * @param maxResults
 	 * @return
 	 */
-	public List<Paper> search(String [] searchTerms, int maxResults) {
+	public List<Paper> search(ArrayList <String> terms, int maxResults) {
 		
 		try {
 			
-			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerms), maxResults));
+			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(terms), maxResults));
 			final InputStream stream = url.openStream();
 			System.out.println(url);
 
@@ -99,18 +99,18 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 		return null;
 	}
 
-	public String buildSearch(String [] terms) {
+	public String buildSearch(ArrayList <String> terms) {
 		
 		String searchTerm = "";
 	
 		try {
 			
 			
-			for (int i = 0; i < terms.length; i++){
+			for (int i = 0; i < terms.size(); i++){
 				
-				String term = terms [i];
+				String term = terms.get(i);
 				term = URLEncoder.encode(term, "UTF-8");
-				if (i == terms.length - 1)
+				if (i == terms.size() - 1)
 					searchTerm += term;
 				else
 					searchTerm += term + "+AND+";

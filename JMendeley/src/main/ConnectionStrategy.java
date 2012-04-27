@@ -1,5 +1,6 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -12,9 +13,9 @@ import org.json.JSONException;
  */
 public interface ConnectionStrategy {
 	
-	public abstract List<Paper> search(String [] searchTerms, int maxResults) throws JSONException ;
+	public abstract List<Paper> search(ArrayList <String> terms, int maxResults) throws JSONException ;
 	
-	public abstract String buildSearch(String [] searchTerms); 
+	public abstract String buildSearch(ArrayList <String> terms); 
 	
 	public abstract String identifyConnection();
 }

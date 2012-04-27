@@ -32,7 +32,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	 * @return
 	 * @throws JSONException 
 	 */
-	public List<Paper> search(String [] terms, int maxResults) throws JSONException {
+	public List<Paper> search(ArrayList <String> terms, int maxResults) throws JSONException {
 	
 		String searchURL = String.format(JMendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, buildSearch(terms), maxResults);
 
@@ -80,20 +80,45 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 		return papers;
 	}
 	
-	public  String buildSearch(String [] terms) {
+	public  String buildSearch(ArrayList <String> terms) {
 		
 		String searchTerm = "";
 		
 		try {
 			
-			for (int i = 0; i < terms.length; i++){
+			for (int i = 0; i < terms.size(); i++){
 				
-					String term = terms [i];
+					String term = terms.get(i);
+					String temp = term;
+					
+					//Deal with no term.
+					if (term.equals("") == true)
+						continue;
+					
+					//URL Encode.
 					term = URLEncoder.encode(term, "UTF-8").replace("+", "%20");
-					if (i == terms.length - 1)
-						searchTerm += term;
-					else
-						searchTerm += term + "%20";
+					
+					if (term.contains(JMendeleyApiUrls.JMEND_SEARCH_TERM) == true)
+						searchTerm += JMendeleyApiUrls.MENDELEY_SEARCH_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_TITLE_TERM) == true)
+						searchTerm += JMendeleyApiUrls.MENDELEY_TITLE_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_AUTHOR_TERM) == true)
+						searchTerm += JMendeleyApiUrls.MENDELEY_AUTHOR_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_YEAR_TERM) == true)
+						searchTerm += JMendeleyApiUrls.MENDELEY_YEAR_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_PUBREF_TERM) == true)
+						searchTerm += JMendeleyApiUrls.MENDELEY_PUBREF_TERM;
+					
+					
+					
+					//Should be only TWO terms - the prefix and the actual search term.
+					String [] thingToSplit = term.split("[a-zA-Z]+:");
+					for (int j = 1; j < thingToSplit.length; j++)
+						searchTerm += thingToSplit [i];
+					
+					//Must add a Mendeley-specific conjunction here (if need be).
+					if (i != terms.size() - 1)
+						searchTerm += "%20";
 				
 			}
 			

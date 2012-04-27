@@ -23,6 +23,14 @@ public class JMendeleyApiUrls {
 	/** Mendeley GET (SEARCH) for Document Details. Requires the document id. **/
 	public static final String PUBLIC_GET_DOCUMENT_DETAILS = "http://api.mendeley.com/oapi/documents/details/%s/";
 	
+	
+	//JMendeley String Prefixes for Search Terms
+	public static final String JMEND_SEARCH_TERM = "s:";
+	public static final String JMEND_AUTHOR_TERM = "a:";
+	public static final String JMEND_TITLE_TERM = "t:";
+	public static final String JMEND_YEAR_TERM = "y:";
+	public static final String JMEND_PUBREF_TERM = "pr:";
+	
 	//Mendeley Search Term Prefixes.
 	public static final String MENDELEY_SEARCH_TERM = "";
 	public static final String MENDELEY_AUTHOR_TERM = "author:";

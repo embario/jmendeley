@@ -91,12 +91,12 @@ public class SearchManager {
 	public List <Paper> searchForPapers(ArrayList <String> terms, ArrayList <ConnectionStrategy> connections) {
 
 		ArrayList <Paper> papers = new ArrayList <Paper> ();
-		
+
 		try {
 			
 			for (ConnectionStrategy s : connections){
 
-				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search((String []) terms.toArray(), 50);
+				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(terms, 50);
 
 				if(thesePapers == null)
 					continue;
