@@ -20,6 +20,13 @@ public class Account {
 		this._url = url;
 	}
 	
+	protected String getProfileID(){ return this._profileid;}
+	protected String getName(){ return this._name;}
+	protected String getAcademicStatus(){ return this._academic_status;}
+	protected String getDiscipline(){ return this._discipline;}
+	protected String [] getResearchInterests(){ return this._research_interests;}
+	protected String getURL(){ return this._url;}
+	
 	
 	public String toString() {
 		

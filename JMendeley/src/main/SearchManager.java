@@ -56,7 +56,6 @@ public class SearchManager {
 		this._connections = new ArrayList <ConnectionStrategy> ();
 	}
 
-
 	/**
 	 * Our singleton factory method. We return a singleton object if it exists; 
 	 * create just one and return it if it doesn't.

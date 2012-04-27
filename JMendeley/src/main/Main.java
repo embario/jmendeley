@@ -46,7 +46,7 @@ public class Main {
 			//Instantiate the singleton Search Manager that is responsible for preparing and performing API searches.
 			SearchManager sm = SearchManager.getInstance(acm, am);
 			
-			SearchView view = SearchView.getInstance(sm);
+			SearchView view = SearchView.getInstance(sm, acm);
 			
 			//search using the API connectors.
 			//sm.searchForPapers();

@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 public class JMendeleyUIUtils {
 
 	private static JFrame _verificationCodeFrame = new JFrame();
-	private static final String MENDELEY_ICON = "./img/mendeley.png";
+	public static final String MENDELEY_ICON = "./img/mendeley.png";
 	
 	
 	/**
