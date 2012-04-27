@@ -82,21 +82,21 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	
 	public  String buildSearch(ArrayList <String> terms) {
 		
-		String searchTerm = "";
+		String searchTerm = " ";
 		
 		try {
 			
 			for (int i = 0; i < terms.size(); i++){
 				
 					String term = terms.get(i);
-					String temp = term;
+					String [] tokens = term.split("([a-zA-Z]+:)");
 					
 					//Deal with no term.
 					if (term.equals("") == true)
 						continue;
 					
 					//URL Encode.
-					term = URLEncoder.encode(term, "UTF-8").replace("+", "%20");
+					//term = URLEncoder.encode(term, "UTF-8").replace("+", "%20");
 					
 					if (term.contains(JMendeleyApiUrls.JMEND_SEARCH_TERM) == true)
 						searchTerm += JMendeleyApiUrls.MENDELEY_SEARCH_TERM;
@@ -109,12 +109,10 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 					else if(term.contains(JMendeleyApiUrls.JMEND_PUBREF_TERM) == true)
 						searchTerm += JMendeleyApiUrls.MENDELEY_PUBREF_TERM;
 					
-					
-					
 					//Should be only TWO terms - the prefix and the actual search term.
-					String [] thingToSplit = term.split("[a-zA-Z]+:");
+					String [] thingToSplit = term.split("([a-zA-Z]+:)");
 					for (int j = 1; j < thingToSplit.length; j++)
-						searchTerm += thingToSplit [i];
+						searchTerm += URLEncoder.encode(thingToSplit[j], "UTF-8").replace("+", "%20");
 					
 					//Must add a Mendeley-specific conjunction here (if need be).
 					if (i != terms.size() - 1)
