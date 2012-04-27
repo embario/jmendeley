@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 
-import util.MendeleyApiUrls;
+import util.JMendeleyApiUrls;
 
 public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	
@@ -32,19 +32,20 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 	 * @return
 	 * @throws JSONException 
 	 */
-	public List<Paper> search(String searchTerm, String title, String author, int maxResults) throws JSONException {
+	public List<Paper> search(String [] terms, int maxResults) throws JSONException {
 	
-		String searchURL = String.format(MendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, buildSearch(searchTerm, title, author), maxResults);
+		String searchURL = String.format(JMendeleyApiUrls.PUBLIC_GET_SEARCH_FOR_DOCUMENTS, buildSearch(terms), maxResults);
 
 		Response response = auth.sendPublicRequest(Verb.GET, searchURL);
 		ArrayList<Paper> papers = new ArrayList<Paper>();
+		
 		try {
 			JSONObject results = new JSONObject(response.getBody());
 			JSONArray documents = results.getJSONArray("documents");
 			for(int i = 0; i < documents.length(); i++) {
 				JSONObject doc = documents.getJSONObject(i);
 				String uuid = doc.getString("uuid");
-				String docURL = String.format(MendeleyApiUrls.PUBLIC_GET_DOCUMENT_DETAILS, uuid);
+				String docURL = String.format(JMendeleyApiUrls.PUBLIC_GET_DOCUMENT_DETAILS, uuid);
 				
 				response = auth.sendPublicRequest(Verb.GET, docURL);
 				
@@ -79,8 +80,26 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 		return papers;
 	}
 	
-	public  String buildSearch(String all, String title, String author) {
+	public  String buildSearch(String [] terms) {
+		
+		String searchTerm = "";
+		
 		try {
+			
+			for (int i = 0; i < terms.length; i++){
+				
+					String term = terms [i];
+					term = URLEncoder.encode(term, "UTF-8").replace("+", "%20");
+					if (i == terms.length - 1)
+						searchTerm += term;
+					else
+						searchTerm += term + "%20";
+				
+			}
+			
+			return searchTerm;
+			
+			/*
 			all = (all==null)?null:URLEncoder.encode(all, "UTF-8").replace("+", "%20");
 			title = (title==null)?null:URLEncoder.encode(title, "UTF-8").replace("+", "%20");
 			author = (author==null)?null:URLEncoder.encode(author, "UTF-8").replace("+", "%20");
@@ -105,11 +124,9 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 				term.append("author:"+author);
 			}
 
-			return term.toString();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			return term.toString(); */
+			
+		} catch (UnsupportedEncodingException e) { e.printStackTrace();}
 		return null;
 	}
 	

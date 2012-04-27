@@ -12,9 +12,9 @@ import org.json.JSONException;
  */
 public interface ConnectionStrategy {
 	
-	public abstract List<Paper> search(String searchTerm, String title, String author, int maxResults) throws JSONException ;
+	public abstract List<Paper> search(String [] searchTerms, int maxResults) throws JSONException ;
 	
-	public abstract String buildSearch(String all, String title, String author); 
+	public abstract String buildSearch(String [] searchTerms); 
 	
 	public abstract String identifyConnection();
 }

@@ -33,10 +33,11 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 	 * @param maxResults
 	 * @return
 	 */
-	public List<Paper> search(String searchTerm, String title, String author, int maxResults) {
+	public List<Paper> search(String [] searchTerms, int maxResults) {
+		
 		try {
 			
-			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerm, title, author), maxResults));
+			final URL url = new URL(String.format("http://export.arxiv.org/api/query?search_query=%s&start=0&max_results=%d", buildSearch(searchTerms), maxResults));
 			final InputStream stream = url.openStream();
 			System.out.println(url);
 
@@ -98,9 +99,25 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 		return null;
 	}
 
-	public String buildSearch(String all, String title, String author) {
+	public String buildSearch(String [] terms) {
+		
+		String searchTerm = "";
+	
 		try {
-			all = (all==null)?null:URLEncoder.encode(all, "UTF-8");
+			
+			
+			for (int i = 0; i < terms.length; i++){
+				
+				String term = terms [i];
+				term = URLEncoder.encode(term, "UTF-8");
+				if (i == terms.length - 1)
+					searchTerm += term;
+				else
+					searchTerm += term + "+AND+";
+			
+			}
+			
+			/* all = (all==null)?null:URLEncoder.encode(all, "UTF-8");
 			title = (title==null)?null:URLEncoder.encode(title, "UTF-8");
 			author = (author==null)?null:URLEncoder.encode(author, "UTF-8");
 
@@ -122,13 +139,11 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 				if(alle || tie)
 					term.append("+AND+");
 				term.append("au:"+author);
-			}
+			} */
 
-			return term.toString();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			return searchTerm;
+		} catch (UnsupportedEncodingException e) { e.printStackTrace();}
+		
 		return null;
 	}
 	

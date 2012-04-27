@@ -2,11 +2,14 @@ package main;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -21,6 +24,7 @@ public class SearchView implements ActionListener {
 	
 	private SearchManager _searchManager = null;
 	private AccountManager _accountManager = null;
+	private AuthenticationManager _authManager = null;
 	private Account _account = null;
 	
 	//UI Elements
@@ -29,12 +33,14 @@ public class SearchView implements ActionListener {
 	private JFrame _frame = null;
 	private JPanel _panel = null;
 	
-	//TODO: Profile Panel elements
+	//Profile Panel elements
 	private JPanel _profilePanel = null;
 	private ImageIcon _icon = null;
-
 	
-	//TODO: Results Panel elements
+	//Results Panel elements
+	private SearchResultsTable _resultsTable;
+	private JPanel _searchResultsActionPanel;
+	private JButton _searchResultsActionButton;
 	
 	//Search Panel elements
 	private JPanel _searchPanel = null;
@@ -46,19 +52,36 @@ public class SearchView implements ActionListener {
 	private JTextField _yearField = null;
 	private JTextField _pubRefField = null;
 
-	private SearchResultsTable _resultsTable;
 
-	private JPanel _searchResultsActionPanel;
-
-	private JButton _searchResultsActionButton;
 	
 	
-	
-	private SearchView (SearchManager sm, AccountManager am){
+	/**
+	 * Basic private constructor for the SearchView.
+	 * @param sm
+	 * @param am
+	 */
+	private SearchView (SearchManager sm, AccountManager am, AuthenticationManager auth){
 		
 		this._searchManager = sm;
 		this._accountManager = am;
-		Account account = this._accountManager.getAccount();
+		this._authManager = auth;
+		this._account = this._accountManager.getAccount();
+		
+	}
+	
+	
+	public static void loadView(SearchManager sm, AccountManager am, AuthenticationManager auth){
+		
+		SearchView view = new SearchView (sm, am, auth);
+		view.makeGUI();
+	}
+	
+
+
+	/**
+	 * Method for constructing all of the various parts that make up the JMendeley Search GUI.
+	 */
+	private void makeGUI() {
 		
 		//Instantiate the GUI.
 		this._frame = new JFrame("JMendeley");
@@ -86,6 +109,7 @@ public class SearchView implements ActionListener {
 		ImageIcon icon = this._icon = new ImageIcon(JMendeleyUIUtils.MENDELEY_ICON);
 		JLabel iconImage = new JLabel(icon);
 		
+		Account account = this._account;
 		JLabel accName = new JLabel (account.getName());
 		JLabel accProfileID = new JLabel("Profile ID: " + account.getProfileID());
 		JLabel accAcademicStatus = new JLabel ("Academic Status: " + account.getAcademicStatus());
@@ -115,7 +139,7 @@ public class SearchView implements ActionListener {
 		
 		
 		//Search Panel Configuration - splits search panel by separating the text field elements from the action elements.
-		JPanel searchPanel = new JPanel();
+		JPanel searchPanel = this._searchPanel = new JPanel();
 		searchPanel.setLayout(new GridLayout(2,0));
 		searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		
@@ -243,17 +267,7 @@ public class SearchView implements ActionListener {
 		
 		//Make sure to terminate the program when the GUI is closed.
 		this._frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				
 	}
-	
-	
-	public static SearchView getInstance(SearchManager sm, AccountManager am){
-		
-		if (_singleton == null)
-			_singleton = new SearchView(sm, am);
-		return _singleton;
-	}
-	
 
 
 	@Override
@@ -261,8 +275,45 @@ public class SearchView implements ActionListener {
 		
 		//If the User hits the search button...
 		if (arg0.getSource() == this._searchButton){
-			//this._searchManager.searchForPapers();
 			
+			//Our list of search terms and refinements.
+			ArrayList <String> terms = new ArrayList <String> ();
+			Component [] textfields = this._searchPanel.getComponents();
+			
+			//Iterate through the components found in the searchPanel.
+			for (Component comp : textfields){
+				
+				if (comp instanceof JTextField == false)
+					continue;
+				
+				JTextField field = (JTextField) comp;
+				
+				//Add the text to the terms list.
+				terms.add(field.getText());
+			}
+			
+			//Our list of selected connection strategies.
+			ArrayList <ConnectionStrategy> connections = new ArrayList <ConnectionStrategy>();
+			Component [] checkboxes = this._apiBoxPanel.getComponents();
+			
+			//Iterate through the components found in the ApiPanel.
+			for (Component comp : checkboxes){
+				
+				if (comp instanceof JCheckBox == false)
+					continue;
+				
+				JCheckBox box = (JCheckBox) comp;
+				
+				if (box.getText().contains("Mendeley") == true && box.isSelected() == true)
+					connections.add(new MendeleyConnectionStrategy(this._authManager));
+				
+				else if (box.getText().contains("ArXiv") == true && box.isSelected() == true)
+					connections.add(new ArXivConnectionStrategy());	
+		
+			}//end for loop
+			
+			ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections);
+			System.out.println(papers);
 		}
 		
 	}

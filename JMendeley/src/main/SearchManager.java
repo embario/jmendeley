@@ -26,7 +26,7 @@ import org.scribe.model.Verb;
 
 import com.google.common.io.ByteStreams;
 
-import util.MendeleyApiUrls;
+import util.JMendeleyApiUrls;
 import util.SHASum;
 
 /**
@@ -49,6 +49,7 @@ public class SearchManager {
 	
 	/** Flag for flipping concurrency on/off **/
 	private boolean _concurrent = true;
+	
 
 	private SearchManager(AccountManager acm, AuthenticationManager am) {
 		this.acm = acm;
@@ -72,62 +73,58 @@ public class SearchManager {
 	}
 
 
-	public void searchForPapers() throws JSONException {
-
-		Scanner scn = new Scanner(System.in);
-		System.out.print("Please enter your search term: ");
-		String searchTerm = scn.nextLine();
-		System.out.print("How many results?: ");
-		int maxResults = Integer.parseInt(scn.nextLine());
-		System.out.println("Type 'm' if you want to search Mendeley. Type 'a' if you want to search arXiv. Type both if you want both.");
-		String choice = scn.nextLine();
-
-		ArrayList <ConnectionStrategy> connections = this._connections;
-
-		if (choice.trim().contains("m") == true)
-			connections.add(new MendeleyConnectionStrategy(this.am));
-		if (choice.trim().contains("a") == true)
-			connections.add(new ArXivConnectionStrategy());
+	/**
+	 * This method accepts a String array of search refinements (including basic search term) and an array
+	 * of ConnectionStrategies, and it performs a search based on these parameters.
+	 * 
+	 * The body of the search terms are as follows (in this order):
+	 * -Search
+	 * -Title
+	 * -Author
+	 * -Year
+	 * -Publication Reference
+	 * 
+	 * @param terms
+	 * @param connections
+	 * @throws JSONException
+	 */
+	public List <Paper> searchForPapers(ArrayList <String> terms, ArrayList <ConnectionStrategy> connections) {
 
 		ArrayList <Paper> papers = new ArrayList <Paper> ();
 		
-		for (ConnectionStrategy s : connections){
-
-			ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(searchTerm, null, null, maxResults);
-
-			if(thesePapers == null)
-				continue;
-
-			System.out.println(s.identifyConnection());
-
-			for (Paper p : thesePapers){
-				System.out.println(p.summarize());
-				System.out.println();	
-			}
-
-			//Add the papers found to the list.
-			papers.addAll(thesePapers);
-
-		}
-
 		try {
-			//Let the concurrency begin (here).
-			sendPapersToMendeley(scn, papers);
 			
-		} catch (Exception e) { e.printStackTrace();}
+			for (ConnectionStrategy s : connections){
+
+				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search((String []) terms.toArray(), 50);
+
+				if(thesePapers == null)
+					continue;
+
+				System.out.println(s.identifyConnection());
+				for (Paper p : thesePapers){
+					System.out.println(p.summarize());
+					System.out.println();	
+				}
+
+				//Add the papers found to the list.
+				papers.addAll(thesePapers);
+
+			}//end for loop
+			
+		} catch (JSONException j){System.err.println(j);}
+		
+		return papers;
 	}
 
 
 
-	private boolean sendPapersToMendeley(Scanner scn, List<Paper> papers) throws InterruptedException, ExecutionException {
-
-		System.out.println("Do you wish to add these papers to your Mendeley account? (yes/no)");
+	private boolean sendPapersToMendeley(List<Paper> papers) throws InterruptedException, ExecutionException {
 
 		long init = 0;
-		String answer = scn.nextLine();
 		
 		//If we want to send papers...
-		if (answer.equalsIgnoreCase("yes") && this._concurrent) {
+		if (this._concurrent) {
 			
 			//Start the timer.
 			init = System.currentTimeMillis();
@@ -219,14 +216,14 @@ public class SearchManager {
 						String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTF-8").replace("+", "%20");
 
 						//Craft the response, POST-it to Mendeley, and get the Document ID back.
-						Response response = am.sendRequest(Verb.POST, MendeleyApiUrls.USER_POST_DOCUMENT_URL + encodedURL);
+						Response response = am.sendRequest(Verb.POST, JMendeleyApiUrls.USER_POST_DOCUMENT_URL + encodedURL);
 						System.out.println("Metadata for " + p.title + " uploaded...");
 						JSONObject docIDObj = new JSONObject(response.getBody());
 						String id = docIDObj.getString("document_id");
 
 						if(p.pdf != null) {
 							//Now, send off the PDF bytes off to specified document PUT request.
-							OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(MendeleyApiUrls.USER_PUT_DOCUMENT_PDF_URL,id));
+							OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(JMendeleyApiUrls.USER_PUT_DOCUMENT_PDF_URL,id));
 
 							request.addOAuthParameter("oauth_body_hash", p.sha);
 							request.addPayload(p.file);
@@ -252,7 +249,7 @@ public class SearchManager {
 
 			//return true;
 			
-		} else if(answer.equalsIgnoreCase("yes") && this._concurrent == false) {
+		} else if(this._concurrent == false) {
 			
 			System.out.println("proceeding on slow (sequential) path");
 			init = System.currentTimeMillis();
@@ -264,7 +261,7 @@ public class SearchManager {
 					String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTF-8").replace("+", "%20");
 
 					//Craft the response, POST-it to Mendeley, and get the Document ID back.
-					Response response = am.sendRequest(Verb.POST, MendeleyApiUrls.USER_POST_DOCUMENT_URL + encodedURL);
+					Response response = am.sendRequest(Verb.POST, JMendeleyApiUrls.USER_POST_DOCUMENT_URL + encodedURL);
 					JSONObject docIDObj = new JSONObject(response.getBody());
 					String id = docIDObj.getString("document_id");
 
@@ -273,7 +270,7 @@ public class SearchManager {
 					String sha = SHASum.SHASum(fileBytes);
 
 					//Now, send off the PDF bytes off to specified document PUT request.
-					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(MendeleyApiUrls.USER_PUT_DOCUMENT_PDF_URL,id));
+					OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(JMendeleyApiUrls.USER_PUT_DOCUMENT_PDF_URL,id));
 
 					request.addOAuthParameter("oauth_body_hash", sha);
 					request.addPayload(fileBytes);
