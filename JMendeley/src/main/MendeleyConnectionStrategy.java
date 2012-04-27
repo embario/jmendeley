@@ -70,7 +70,7 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 					p.type = "Journal Article";
 				} else p.type = "Generic";
 				
-				p.year = doc.getString("year");
+				p.year = doc.getInt("year") + "";
 				
 				papers.add(p);
 			}
@@ -89,7 +89,6 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 			for (int i = 0; i < terms.size(); i++){
 				
 					String term = terms.get(i);
-					String [] tokens = term.split("([a-zA-Z]+:)");
 					
 					//Deal with no term.
 					if (term.equals("") == true)

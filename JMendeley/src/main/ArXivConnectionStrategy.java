@@ -21,6 +21,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import util.JMendeleyApiUrls;
+
 public class ArXivConnectionStrategy implements ConnectionStrategy {
 
 	public ArXivConnectionStrategy() { }
@@ -101,22 +103,41 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 
 	public String buildSearch(ArrayList <String> terms) {
 		
-		String searchTerm = "";
-	
+		String searchTerm = " ";
+		
 		try {
-			
 			
 			for (int i = 0; i < terms.size(); i++){
 				
-				String term = terms.get(i);
-				term = URLEncoder.encode(term, "UTF-8");
-				if (i == terms.size() - 1)
-					searchTerm += term;
-				else
-					searchTerm += term + "+AND+";
-			
+					String term = terms.get(i);
+					
+					//Deal with no term.
+					if (term.equals("") == true)
+						continue;
+					
+					if (term.contains(JMendeleyApiUrls.JMEND_SEARCH_TERM) == true)
+						searchTerm += JMendeleyApiUrls.ARXIV_SEARCH_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_TITLE_TERM) == true)
+						searchTerm += JMendeleyApiUrls.ARXIV_TITLE_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_AUTHOR_TERM) == true)
+						searchTerm += JMendeleyApiUrls.ARXIV_AUTHOR_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_YEAR_TERM) == true)
+						searchTerm += JMendeleyApiUrls.ARXIV_YEAR_TERM;
+					else if(term.contains(JMendeleyApiUrls.JMEND_PUBREF_TERM) == true)
+						searchTerm += JMendeleyApiUrls.ARXIV_PUBREF_TERM;
+					
+					//Should be only TWO terms - the prefix and the actual search term.
+					String [] thingToSplit = term.split("([a-zA-Z]+:)");
+					for (int j = 1; j < thingToSplit.length; j++)
+						searchTerm += URLEncoder.encode(thingToSplit[j], "UTF-8");
+					
+					//Must add a Mendeley-specific conjunction here (if need be).
+					if (i != terms.size() - 1)
+						searchTerm += "+AND+";
+				
 			}
 			
+			return searchTerm;
 			/* all = (all==null)?null:URLEncoder.encode(all, "UTF-8");
 			title = (title==null)?null:URLEncoder.encode(title, "UTF-8");
 			author = (author==null)?null:URLEncoder.encode(author, "UTF-8");
@@ -141,7 +162,6 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 				term.append("au:"+author);
 			} */
 
-			return searchTerm;
 		} catch (UnsupportedEncodingException e) { e.printStackTrace();}
 		
 		return null;

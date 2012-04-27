@@ -292,6 +292,11 @@ public class SearchView implements ActionListener {
 				
 				//It is one of our textfields.
 				JTextField field = (JTextField) comp;
+				
+				//If empty, we don't want it.
+				if (field.getText().equals("") == true)
+					continue;
+				
 				String prefix = "";
 				if (field == this._searchBarField)
 					prefix += JMendeleyApiUrls.JMEND_SEARCH_TERM;

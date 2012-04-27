@@ -71,4 +71,6 @@ public class Paper {
 		
 		return term.toString();
 	}
+	
+	public String toString() { return this.summarize();}
 }
