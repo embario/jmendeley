@@ -2,14 +2,10 @@ package main;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -19,9 +15,6 @@ import util.JMendeleyUIUtils;
 import util.SpringUtilities;
 
 public class SearchView implements ActionListener {
-
-	/** The Singleton for this class **/
-	private static SearchView _singleton = null;
 	
 	private SearchManager _searchManager = null;
 	private AccountManager _accountManager = null;
@@ -34,25 +27,23 @@ public class SearchView implements ActionListener {
 	private JFrame _frame = null;
 	private JPanel _panel = null;
 	
-	//Profile Panel elements
-	private JPanel _profilePanel = null;
-	private ImageIcon _icon = null;
-	
 	//Results Panel elements
 	private SearchResultsTable _resultsTable;
 	private JPanel _searchResultsActionPanel;
 	private JButton _searchResultsActionButton;
 	
 	//Search Panel elements
-	private JPanel _searchPanel = null;
-	private JPanel _searchFieldsPanel;
-	private JPanel _apiBoxPanel = null;
 	private JButton _searchButton = null;
 	private JTextField _searchBarField = null;
 	private JTextField _titleField = null;
 	private JTextField _authorField = null;
 	private JTextField _yearField = null;
 	private JTextField _pubRefField = null;
+	private JTextField _searchNumResults;
+	
+	//ODL Checkboxes.
+	private JCheckBox _apiMendeleyBox = null;
+	private JCheckBox _apiArXivBox = null;
 
 	
 	
@@ -102,12 +93,12 @@ public class SearchView implements ActionListener {
 		/** West Panel is split in two panels - profile and search panels **/
 		
 		//Profile Panel Configuration - prints out Account information.
-		JPanel profilePanel = this._profilePanel = new JPanel();
+		JPanel profilePanel = new JPanel();
 		profilePanel.setLayout(new SpringLayout());
 		profilePanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
 		//JLabels for the Profile Panel
-		ImageIcon icon = this._icon = new ImageIcon(JMendeleyUIUtils.MENDELEY_ICON);
+		ImageIcon icon = new ImageIcon(JMendeleyUIUtils.MENDELEY_ICON);
 		JLabel iconImage = new JLabel(icon);
 		
 		Account account = this._account;
@@ -139,15 +130,14 @@ public class SearchView implements ActionListener {
 		
 		
 		//Search Panel Configuration - splits search panel by separating the text field elements from the action elements.
-		JPanel searchPanel = this._searchPanel = new JPanel();
+		JPanel searchPanel = new JPanel();
 		searchPanel.setLayout(new GridLayout(2,0));
 		searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		
 		
 		//First Panel for searchPanel
-		JPanel searchFieldsPanel = this._searchFieldsPanel = new JPanel();
+		JPanel searchFieldsPanel = new JPanel();
 		searchFieldsPanel.setLayout(new SpringLayout());
-	
 		
 		//Search Bar
 		JTextField searchBar = this._searchBarField = new JTextField();
@@ -179,6 +169,11 @@ public class SearchView implements ActionListener {
 		JLabel pubFieldLabel = new JLabel ("Publication Reference:", JLabel.TRAILING);
 		pubFieldLabel.setLabelFor(pubField);
 		
+		//Max Results Field
+		JTextField searchNumResults = this._searchNumResults = new JTextField(1);
+		JLabel searchNumResultsLabel = new JLabel("Max Results:", JLabel.TRAILING);
+		searchNumResultsLabel.setLabelFor(searchNumResults);
+		
 		searchFieldsPanel.add(searchBarLabel);
 		searchFieldsPanel.add(searchBar);
 		searchFieldsPanel.add(titleFieldLabel);
@@ -189,31 +184,29 @@ public class SearchView implements ActionListener {
 		searchFieldsPanel.add(yearField);
 		searchFieldsPanel.add(pubFieldLabel);
 		searchFieldsPanel.add(pubField);
+		searchFieldsPanel.add(searchNumResultsLabel);
+		searchFieldsPanel.add(searchNumResults);
 		
 		//Lay out the panel.
-        SpringUtilities.makeCompactGrid(searchFieldsPanel, 5, 2, 10, 10, 5, 5);
+        SpringUtilities.makeCompactGrid(searchFieldsPanel, 6, 2, 10, 10, 5, 5);
         
-		
+		//Layout the Search Actions Panel.
+		JPanel searchActionsPanel = new JPanel();
+		searchActionsPanel.setLayout(new SpringLayout());
+        
 		//apiPanel configuration - Panel that holds API checkboxes.
-		JPanel apiPanel = this._apiBoxPanel = new JPanel();
+		JPanel apiPanel = new JPanel();
 		apiPanel.setBackground(Color.gray);
 		
-		//API Box Label
+		//ODL Checkboxes.
+		JCheckBox arxivBox = this._apiArXivBox = new JCheckBox("ArXiv");
+		JCheckBox mendBox =  this._apiMendeleyBox = new JCheckBox ("Mendeley");
 		JLabel apiBoxLabel = new JLabel("Digital Library Selection");
-		//ArXiv CheckBox
-		JCheckBox arxivBox = new JCheckBox("ArXiv");
-		//Mendeley Checkbox
-		JCheckBox mendBox =  new JCheckBox ("Mendeley");
 		
 		apiPanel.add(apiBoxLabel);
 		apiPanel.add(arxivBox);
 		apiPanel.add(mendBox);
 		
-
-		//Layout the Search Actions Panel.
-		JPanel searchActionsPanel = new JPanel();
-		searchActionsPanel.setLayout(new SpringLayout());
-	
 		searchActionsPanel.add(apiPanel);	
 		searchActionsPanel.add(new JPanel());
 		searchActionsPanel.add(searchButton);
@@ -282,61 +275,52 @@ public class SearchView implements ActionListener {
 			
 			//Our list of search terms and refinements.
 			ArrayList <String> terms = new ArrayList <String> ();
-			Component [] textfields = this._searchFieldsPanel.getComponents();
 			
-			//Iterate through the components found in the searchPanel.
-			for (Component comp : textfields){
-				
-				if (comp instanceof JTextField == false)
-					continue;
-				
-				//It is one of our textfields.
-				JTextField field = (JTextField) comp;
-				
-				//If empty, we don't want it.
-				if (field.getText().equals("") == true)
-					continue;
-				
-				String prefix = "";
-				if (field == this._searchBarField)
-					prefix += JMendeleyApiUrls.JMEND_SEARCH_TERM;
-				else if (field == this._authorField)
-					prefix += JMendeleyApiUrls.JMEND_AUTHOR_TERM;
-				else if (field == this._titleField)
-					prefix += JMendeleyApiUrls.JMEND_TITLE_TERM;
-				else if (field == this._yearField)
-					prefix += JMendeleyApiUrls.JMEND_YEAR_TERM;
-				else if (field == this._pubRefField)
-					prefix += JMendeleyApiUrls.JMEND_PUBREF_TERM;
-				
-				//Add the text to the terms list.
-				terms.add(prefix + field.getText());
-			}
-			
+			//Add search terms (if need be).
+			if (this._searchBarField.getText().equals("") == false)
+				terms.add(JMendeleyApiUrls.JMEND_SEARCH_TERM + this._searchBarField.getText());
+			if (this._authorField.getText().equals("") == false)
+				terms.add(JMendeleyApiUrls.JMEND_AUTHOR_TERM + this._authorField.getText());	
+			if (this._titleField.getText().equals("") == false)
+				terms.add(JMendeleyApiUrls.JMEND_TITLE_TERM + this._titleField.getText());
+			if (this._yearField.getText().equals("") == false)
+				terms.add(JMendeleyApiUrls.JMEND_YEAR_TERM + this._yearField.getText());
+			if (this._pubRefField.getText().equals("") == false)
+				terms.add(JMendeleyApiUrls.JMEND_PUBREF_TERM + this._pubRefField.getText());
+		
 			//Our list of selected connection strategies.
 			ArrayList <ConnectionStrategy> connections = new ArrayList <ConnectionStrategy>();
-			Component [] checkboxes = this._apiBoxPanel.getComponents();
 			
-			//Iterate through the components found in the ApiPanel.
-			for (Component comp : checkboxes){
-				
-				if (comp instanceof JCheckBox == false)
-					continue;
-				
-				JCheckBox box = (JCheckBox) comp;
-				
-				if (box.getText().contains("Mendeley") == true && box.isSelected() == true)
-					connections.add(new MendeleyConnectionStrategy(this._authManager));
-				
-				else if (box.getText().contains("ArXiv") == true && box.isSelected() == true)
-					connections.add(new ArXivConnectionStrategy());	
 		
-			}//end for loop
+			//Add the connections (if need be).
+			if(this._apiArXivBox.isSelected() == true)
+				connections.add(new ArXivConnectionStrategy());
+			if (this._apiMendeleyBox.isSelected() == true)
+				connections.add(new MendeleyConnectionStrategy(this._authManager));
+		
 			
+			//Add Num results.
+			int numResults = 10;
+			String numResultsText = this._searchNumResults.getText();
+			
+			try {
+				
+				if (numResultsText.equals("") == false)
+					numResults = Integer.parseInt(numResultsText);
+				
+			} catch (NumberFormatException e) { 
+				JMendeleyUIUtils.showMessageDialog("Please enter a valid number for 'Max Results'.", 
+						"Max results not valid", JOptionPane.INFORMATION_MESSAGE);
+				return; }
+				
 			if (connections.isEmpty() == false){
 				
-				ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections);
+				//The results of our search!
+				ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections, numResults);
 				System.out.println(papers);
+				
+				if (papers.isEmpty() == true)
+					JMendeleyUIUtils.showMessageDialog("Your search yielded no results!", "No Search Results", JOptionPane.INFORMATION_MESSAGE);
 				
 			} else{
 				
@@ -346,6 +330,16 @@ public class SearchView implements ActionListener {
 			
 
 		}//end if SEARCH
+		
+		
+		//TODO: If we're ready to send papers.
+		if (arg0.getSource() == this._searchResultsActionButton){
+			
+			
+			int answer = JMendeleyUIUtils.showConfirmYesNoDialog("Are you sure you want the send the selected papers to your Mendeley Account?", "Send Papers to Mendeley");
+			
+			
+		}
 		
 	}
 

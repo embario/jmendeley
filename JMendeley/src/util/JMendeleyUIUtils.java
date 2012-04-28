@@ -16,7 +16,19 @@ public class JMendeleyUIUtils {
 	 */
 	public static void showMessageDialog (String message, String title, int messageType){
 		
-		JOptionPane.showMessageDialog(JMendeleyUIUtils._verificationCodeFrame, message, title, messageType);
+		JOptionPane.showMessageDialog(_verificationCodeFrame, message, title, messageType);
+	}
+	
+	/**
+	 * Pop-up a confirm YES/NO dialog given the message and title as a String.
+	 * @param message
+	 * @param title
+	 * @param messageType
+	 * @return
+	 */
+	public static int showConfirmYesNoDialog (String message, String title){
+		
+		return JOptionPane.showConfirmDialog(_verificationCodeFrame, message, title, JOptionPane.YES_NO_OPTION);
 	}
 	
 	public static String popupVerificationCodeDialog(String authURL) {

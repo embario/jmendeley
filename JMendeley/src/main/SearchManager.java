@@ -88,7 +88,7 @@ public class SearchManager {
 	 * @param connections
 	 * @throws JSONException
 	 */
-	public List <Paper> searchForPapers(ArrayList <String> terms, ArrayList <ConnectionStrategy> connections) {
+	public List <Paper> searchForPapers(ArrayList <String> terms, ArrayList <ConnectionStrategy> connections, int numResults) {
 
 		ArrayList <Paper> papers = new ArrayList <Paper> ();
 
@@ -96,7 +96,7 @@ public class SearchManager {
 			
 			for (ConnectionStrategy s : connections){
 
-				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(terms, 50);
+				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(terms, numResults);
 
 				if(thesePapers == null)
 					continue;
