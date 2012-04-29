@@ -46,10 +46,10 @@ public class SearchManager {
 	private AccountManager acm;
 	/** Our reference to the singleton Authentication Manager **/
 	private AuthenticationManager am;
-	
+
 	/** Flag for flipping concurrency on/off **/
-	private boolean _concurrent = true;
-	
+	private final boolean _concurrent = true;
+
 
 	private SearchManager(AccountManager acm, AuthenticationManager am) {
 		this.acm = acm;
@@ -88,13 +88,49 @@ public class SearchManager {
 	 * @param connections
 	 * @throws JSONException
 	 */
-	public List <Paper> searchForPapers(ArrayList <String> terms, ArrayList <ConnectionStrategy> connections, int numResults) {
+	public List <Paper> searchForPapers(final ArrayList <String> terms, ArrayList <ConnectionStrategy> connections, final int numResults) {
 
 		ArrayList <Paper> papers = new ArrayList <Paper> ();
 
+
 		try {
-			
-			for (ConnectionStrategy s : connections){
+
+			int numCores = Runtime.getRuntime().availableProcessors();
+			double blockingCoefficientSearch = 0.9;
+			int searchPoolSize = Math.min((int) (numCores / (1. - blockingCoefficientSearch)), connections.size());
+
+			List<Callable<List<Paper>>> searchTasks = new ArrayList<Callable<List<Paper>>>(connections.size());
+
+			//The work for downloading the PDFs
+			for(final ConnectionStrategy s : connections) {
+				searchTasks.add(new Callable<List<Paper>>() {
+					public List<Paper> call() throws Exception {
+						ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(terms, numResults);
+
+						if(thesePapers == null)
+							return new ArrayList<Paper>();
+
+						System.out.println(s.identifyConnection());
+						
+						return thesePapers;
+					}
+				});
+			}
+
+			//The ExecutorService for concurrently searching
+			final ExecutorService searchExecutorPool = Executors.newFixedThreadPool(searchPoolSize);
+			final List<Future<List<Paper>>> searchResults = searchExecutorPool.invokeAll(searchTasks, 10000, TimeUnit.SECONDS);
+
+			for(final Future<List<Paper>> result : searchResults) {
+				List<Paper> thesePapers = result.get();
+				for (Paper p : thesePapers){
+					System.out.println(p.summarize());
+					System.out.println();	
+				}
+				papers.addAll(thesePapers);
+			}
+
+			/*for (ConnectionStrategy s : connections){
 
 				ArrayList <Paper> thesePapers = (ArrayList<Paper>) s.search(terms, numResults);
 
@@ -111,9 +147,15 @@ public class SearchManager {
 				papers.addAll(thesePapers);
 
 			}//end for loop
-			
-		} catch (JSONException j){System.err.println(j);}
-		
+			 */			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return papers;
 	}
 
@@ -122,20 +164,20 @@ public class SearchManager {
 	private boolean sendPapersToMendeley(List<Paper> papers) throws InterruptedException, ExecutionException {
 
 		long init = 0;
-		
+
 		//If we want to send papers...
 		if (this._concurrent) {
-			
+
 			//Start the timer.
 			init = System.currentTimeMillis();
-			
+
 			//Separate the Papers with PDFS from those without them.
 			ArrayList<Paper> pdfPapers = new ArrayList<Paper>(papers.size());
-			
+
 			for (Paper p : papers) 
 				if(p.pdf != null)
 					pdfPapers.add(p);
-			
+
 			/*
 			 * Concurrency: 
 			 * 
@@ -149,7 +191,7 @@ public class SearchManager {
 			int numCores = Runtime.getRuntime().availableProcessors();
 			double blockingCoefficientDownload = 0.9;
 			int downloadPoolSize = (int) (numCores / (1. - blockingCoefficientDownload));
-			
+
 			List<Callable<Void>> downloadTasks = new ArrayList<Callable<Void>>(pdfPapers.size());
 
 			//The work for downloading the PDFs
@@ -168,10 +210,10 @@ public class SearchManager {
 			//The ExecutorService for concurrently downloading the PDFs
 			final ExecutorService downloadExecutorPool = Executors.newFixedThreadPool(downloadPoolSize);
 			final List<Future<Void>> downloadResults = downloadExecutorPool.invokeAll(downloadTasks, 10000, TimeUnit.SECONDS);
-			
+
 			for(final Future<Void> result : downloadResults)
 				result.get();
-			
+
 
 			System.out.println("PDFs downloaded...");
 
@@ -198,7 +240,7 @@ public class SearchManager {
 
 			for(final Future<Void> result : shaResults)
 				result.get();
-			
+
 
 			System.out.println("SHA1s calculated...");
 
@@ -211,7 +253,7 @@ public class SearchManager {
 			for(final Paper p : papers) {
 				uploadTasks.add(new Callable<Response>() {
 					public Response call() throws Exception {
-						
+
 						//First, encode the paper JSON Object for the URL.
 						String encodedURL = URLEncoder.encode(p.toJSON().toString().trim(), "UTF-8").replace("+", "%20");
 
@@ -248,9 +290,9 @@ public class SearchManager {
 			System.out.println("Paper information uploaded. Process complete.");
 
 			//return true;
-			
+
 		} else if(this._concurrent == false) {
-			
+
 			System.out.println("proceeding on slow (sequential) path");
 			init = System.currentTimeMillis();
 			for (Paper p : papers) {

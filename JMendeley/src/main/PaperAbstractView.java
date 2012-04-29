@@ -29,7 +29,6 @@ public class PaperAbstractView extends JFrame implements ActionListener {
 	}
 	
 	public void display() {
-		
 		Container contentPane = getContentPane();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -57,15 +56,6 @@ public class PaperAbstractView extends JFrame implements ActionListener {
 		setVisible(true);
 	}
 	
-	
-	public static void main(String[] args) {
-		Paper p = new Paper();
-		p.title = "Effects for Funargs";
-		p.abst = "Stack allocation and first-class functions don't naturally mix together. In this paper we show that a type and effect system can be the detergent that helps these features form a nice emulsion. Our interest in this problem comes from our work on the Chapel language, but this problem is also relevant to lambda expressions in C++ and blocks in Objective C. The difficulty in mixing first-class functions and stack allocation is a tension between safety, efficiency, and simplicity. To preserve safety, one must worry about functions outliving the variables they reference: the classic upward funarg problem. There are systems which regain safety but lose programmer-predictable efficiency, and ones that provide both safety and efficiency, but give up simplicity by exposing regions to the programmer. In this paper we present a simple design that combines a type and effect system, for safety, with function-local storage, for control over efficiency. ";
-		PaperAbstractView v = new PaperAbstractView(p);
-		v.display();
-
-	}
 
 	public void actionPerformed(ActionEvent arg0) {
 		

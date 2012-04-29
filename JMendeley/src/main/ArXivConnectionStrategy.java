@@ -103,7 +103,7 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 
 	public String buildSearch(ArrayList <String> terms) {
 		
-		String searchTerm = " ";
+		String searchTerm = "";
 		
 		try {
 			
