@@ -336,6 +336,8 @@ public class SearchView implements ActionListener {
 		if (arg0.getSource() == this._searchResultsActionButton){
 			
 			
+			SearchResultsTable table = this._resultsTable;
+			
 			int answer = JMendeleyUIUtils.showConfirmYesNoDialog("Are you sure you want the send the selected papers to your Mendeley Account?", "Send Papers to Mendeley");
 			
 			

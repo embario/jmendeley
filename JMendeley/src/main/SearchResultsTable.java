@@ -36,13 +36,24 @@ package main;
  * TableDemo.java requires no other files.
  */
  
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+
+import main.TableRenderDemo.MyTableModel;
+
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
  
 /** 
  * TableDemo is just like SimpleTableDemo, except that it
@@ -51,44 +62,143 @@ import java.awt.GridLayout;
 public class SearchResultsTable extends JPanel {
 	
     private boolean DEBUG = false;
+    
+    private ArrayList <Paper> papers = null;
+    private JTable _table = null;
+    private MyTableModel _model = null;
  
     public SearchResultsTable () {
     	
         super(new GridLayout(1,0));
  
-        JTable table = new JTable(new MyTableModel());
+        papers = new ArrayList <Paper> ();
+        
+        MyTableModel model = this._model = new MyTableModel();
+        JTable table = this._table = new JTable(model);
+        model.setTable(table);
+        
         table.setPreferredScrollableViewportSize(new Dimension(800, 600));
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
         table.setShowGrid(false);
+        table.setEnabled(false);
         
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
+        
+        this.initColumns(table);
  
         //Add the scroll pane to this panel.
-        add(scrollPane);
+        this.add(scrollPane);
     }
+    
+    public void updatePaper(ArrayList <Paper> papers){ this._model.updateRows(papers);}
+    
+    
+    /*
+     * This method picks good column sizes.
+     * If all column heads are wider than the column's cells'
+     * contents, then you can just use column.sizeWidthToFit().
+     */
+    private void initColumns(JTable table) {
+    	
+        MyTableModel model = (MyTableModel) table.getModel();
+        TableColumn column = null;
+        Component comp = null;
+        int headerWidth = 0;
+        int cellWidth = 0;
+        
+        Object[] defaultValues  = model.defaultColumnvalues;
+        TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+ 
+        //for each column, set it up.
+        for (int i = 0; i < 5; i++) {
+        	
+            column = table.getColumnModel().getColumn(i);
+ 
+            comp = headerRenderer.getTableCellRendererComponent( null, column.getHeaderValue(), false, false, 0, 0);
+            headerWidth = comp.getPreferredSize().width;
+ 
+            comp = table.getDefaultRenderer(model.getColumnClass(i)).getTableCellRendererComponent(table, defaultValues [i], false, false, 0, i);
+            
+            cellWidth = comp.getPreferredSize().width;
+ 
+            if (DEBUG) {
+                System.out.println("Initializing width of column "
+                                   + i + ". "
+                                   + "headerWidth = " + headerWidth
+                                   + "; cellWidth = " + cellWidth);
+            }
+ 
+            column.setPreferredWidth(Math.max(headerWidth, cellWidth));
+        }
+    }
+    
+    
  
     class MyTableModel extends AbstractTableModel {
-    	
-        private String[] columnNames = {"Select Paper", "Title", "Author(s)", "Year", "Publication Reference"};
+  
+    	private JTable table;
+    	private static final int NUM_COLUMNS = 6;
+    	private static final int NUM_ROWS = 10;
+        private String[] columnNames = {"Select Paper", "Title", "Author(s)", "Year", "Publication Reference", "Abstract"};
         
-        private Object[][] data = new Object [20][5];
+        public final Object [] defaultColumnvalues = {Boolean.FALSE, "title of paper", "author(s)", new Integer (2000), "pub ref", new JButton("Abstract")}; 
+        
+        //Create an empty data array initially.
+        private Object[][] data = {{"", "", "", "", "", ""}};
+        
+        public MyTableModel (){
+        	
+        	/*Action delete = new AbstractAction()
+        	{
+        	    public void actionPerformed(ActionEvent e)
+        	    {
+        	        JTable table = (JTable)e.getSource();
+        	        int modelRow = Integer.valueOf( e.getActionCommand() );
+        	        ((DefaultTableModel)table.getModel()).removeRow(modelRow);
+        	    }
+        	}; */
+        	
+        }
+        
+        public void setTable(JTable table) { 
+        	this.table = table;
+        	this.setValueAt(new ButtonColumn (table, null, data.length - 1, new Paper()), 0, data.length - 1);
+        
+        }
+        
         
         public int getColumnCount() {return columnNames.length;}
         public int getRowCount() {return data.length;}
         public String getColumnName(int col) {return columnNames[col];}
+        
+        //Getter, setter methods for table data.
         public Object getValueAt(int row, int col) {return data[row][col];}
- 
+        public void setValueAt(Object value, int row, int col){
+        	
+        	data [row][col] = value; 
+        	this.fireTableCellUpdated(row, col);
+        	
+        }
+        
+        protected void updateRows(ArrayList <Paper> papers){
+        	
+        	
+        	
+        	
+        }
+        
+        
         /*
          * JTable uses this method to determine the default renderer/
          * editor for each cell.  If we didn't implement this method,
          * then the last column would contain text ("true"/"false"),
          * rather than a check box.
-         *
+         */
         public Class getColumnClass(int c) {
-            return getValueAt(0, c).getClass();
-        }*/
+            return this.getValueAt(0, c).getClass();
+        }
  
  
         private void printDebugData() {
@@ -106,33 +216,4 @@ public class SearchResultsTable extends JPanel {
         }
     }
  
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event-dispatching thread.
-     */
-    private static void createAndShowGUI() {
-        //Create and set up the window.
-        JFrame frame = new JFrame("TableDemo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- 
-        //Create and set up the content pane.
-        SearchResultsTable newContentPane = new SearchResultsTable();
-        newContentPane.setOpaque(true); //content panes must be opaque
-        frame.setContentPane(newContentPane);
- 
-        //Display the window.
-        frame.pack();
-        frame.setVisible(true);
-    }
- 
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
-    }
 }

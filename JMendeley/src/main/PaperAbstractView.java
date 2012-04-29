@@ -13,11 +13,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
-public class AbstractView extends JFrame implements ActionListener {
+public class PaperAbstractView extends JFrame implements ActionListener {
+	
 	private String abst;
 	private String title;
+	private JButton closeButton;
 	
-	public AbstractView(Paper p) {
+	public PaperAbstractView(Paper p) {
 		title = p.title;
 		if(p.abst == null || p.abst.equals("")) {
 			abst = "No abstract available for " + p.title + ", sorry!";
@@ -27,9 +29,13 @@ public class AbstractView extends JFrame implements ActionListener {
 	}
 	
 	public void display() {
-		Container contentPane = getContentPane();		
+		
+		Container contentPane = getContentPane();
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		JPanel abstPanel = new JPanel();
 		contentPane.add(abstPanel);
+		
 		setTitle(title);
 		JTextArea area = new JTextArea(15, 60);
 		JScrollPane scrollPane = new JScrollPane(area); 
@@ -40,7 +46,7 @@ public class AbstractView extends JFrame implements ActionListener {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		abstPanel.add(scrollPane);
 		
-		JButton close = new JButton("Close");
+		JButton close = this.closeButton = new JButton("Close");
 		close.setActionCommand("close");
 		close.addActionListener(this);
 		JPanel buttonPanel = new JPanel();
@@ -51,22 +57,21 @@ public class AbstractView extends JFrame implements ActionListener {
 		setVisible(true);
 	}
 	
-	public void close() {
-		setVisible(false);
-		dispose();
-	}
 	
 	public static void main(String[] args) {
 		Paper p = new Paper();
 		p.title = "Effects for Funargs";
 		p.abst = "Stack allocation and first-class functions don't naturally mix together. In this paper we show that a type and effect system can be the detergent that helps these features form a nice emulsion. Our interest in this problem comes from our work on the Chapel language, but this problem is also relevant to lambda expressions in C++ and blocks in Objective C. The difficulty in mixing first-class functions and stack allocation is a tension between safety, efficiency, and simplicity. To preserve safety, one must worry about functions outliving the variables they reference: the classic upward funarg problem. There are systems which regain safety but lose programmer-predictable efficiency, and ones that provide both safety and efficiency, but give up simplicity by exposing regions to the programmer. In this paper we present a simple design that combines a type and effect system, for safety, with function-local storage, for control over efficiency. ";
-		AbstractView v = new AbstractView(p);
+		PaperAbstractView v = new PaperAbstractView(p);
 		v.display();
 
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		if(arg0.getActionCommand().equals("close"))
-			close();
+		
+		if(arg0.getSource() == this.closeButton){
+			setVisible(false);
+			dispose();
+		}
 	}
 }
