@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.*;
 
@@ -20,6 +21,7 @@ public class SearchView implements ActionListener {
 	private AccountManager _accountManager = null;
 	private AuthenticationManager _authManager = null;
 	private Account _account = null;
+	private ArrayList<Paper> _papers = null;
 	
 	//UI Elements
 	
@@ -58,6 +60,7 @@ public class SearchView implements ActionListener {
 		this._accountManager = am;
 		this._authManager = auth;
 		this._account = this._accountManager.getAccount();
+		this._papers = new ArrayList <Paper> ();
 		
 	}
 	
@@ -270,6 +273,8 @@ public class SearchView implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		
+		SearchResultsTable table = this._resultsTable;
+		
 		//If the User hits the search button...
 		if (arg0.getSource() == this._searchButton){
 			
@@ -316,7 +321,7 @@ public class SearchView implements ActionListener {
 			if (connections.isEmpty() == false){
 				
 				//The results of our search!
-				ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections, numResults);
+				ArrayList <Paper> papers = this._papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections, numResults);
 				
 				if (papers.isEmpty() == true)
 					JMendeleyUIUtils.showMessageDialog("Your search yielded no results!", "No Search Results", JOptionPane.INFORMATION_MESSAGE);
@@ -338,13 +343,32 @@ public class SearchView implements ActionListener {
 		//TODO: If we're ready to send papers.
 		if (arg0.getSource() == this._searchResultsActionButton){
 			
+			ArrayList <Paper> selectedPapers = table.getSelectedPapers();
 			
-			SearchResultsTable table = this._resultsTable;
+			if (this._papers.isEmpty() == false && selectedPapers.isEmpty() == false){
+				
+				int answer = JMendeleyUIUtils.showConfirmYesNoDialog("Are you sure you want to send the selected papers to your Mendeley Account?", "Send Papers to Mendeley");
+				
+				//The user answered "Yes".
+				if (answer == 0){
+
+					
+					try {
+						
+						this._searchManager.sendPapersToMendeley(selectedPapers);
+						JMendeleyUIUtils.showMessageDialog("The selected papers were sent your Mendeley Account successfully.", "Successful", JOptionPane.PLAIN_MESSAGE);
+						
+					} catch (Exception e){
+						JMendeleyUIUtils.showMessageDialog("An Unexpected Error occurred when sending selected papers to Mendeley. Please try again.", "Error occurred", JOptionPane.ERROR_MESSAGE);
+					}
+					
+				}
+				
+			}
+			else
+				JMendeleyUIUtils.showMessageDialog("There are no papers to send to Mendeley. Please select papers or try a search that yields results.", "No Papers to Send", JOptionPane.INFORMATION_MESSAGE);
 			
-			int answer = JMendeleyUIUtils.showConfirmYesNoDialog("Are you sure you want the send the selected papers to your Mendeley Account?", "Send Papers to Mendeley");
-			
-			
-		}
+		}//end conditional
 		
 	}
 }

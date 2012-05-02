@@ -161,7 +161,7 @@ public class SearchManager {
 
 
 
-	private boolean sendPapersToMendeley(List<Paper> papers) throws InterruptedException, ExecutionException {
+	public boolean sendPapersToMendeley(List<Paper> papers) throws InterruptedException, ExecutionException {
 
 		long init = 0;
 

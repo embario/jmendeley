@@ -59,41 +59,48 @@ import java.util.ArrayList;
  * TableDemo is just like SimpleTableDemo, except that it
  * uses a custom TableModel.
  */
+@SuppressWarnings("serial")
 public class SearchResultsTable extends JPanel {
 	
     private boolean DEBUG = false;
     
     private ArrayList <Paper> papers = null;
     private JTable _table = null;
-    private MyTableModel _model = null;
+    private SearchResultsModel _model = null;
  
     public SearchResultsTable () {
     	
         super(new GridLayout(1,0));
  
-        papers = new ArrayList <Paper> ();
+        this.papers = new ArrayList <Paper> ();
         
-        MyTableModel model = this._model = new MyTableModel();
+        SearchResultsModel model = this._model = new SearchResultsModel();
         JTable table = this._table = new JTable(model);
         table.setCellSelectionEnabled(true);
         model.setTable(table);
         
-        table.setPreferredScrollableViewportSize(new Dimension(1400, 900));
+        table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+        table.setShowHorizontalLines(true);
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
+        table.setRowSelectionAllowed(true);
         table.setShowGrid(true);
         table.setEnabled(true);
         
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         
         this.initColumns(table);
  
         //Add the scroll pane to this panel.
         this.add(scrollPane);
     }
+   
     
     public void updatePapers(ArrayList <Paper> papers){ this._model.updateRows(papers);}
+    
+    public ArrayList <Paper> getSelectedPapers () { return this._model.getSelectedPapers();}
     
     
     /*
@@ -103,7 +110,7 @@ public class SearchResultsTable extends JPanel {
      */
     private void initColumns(JTable table) {
     	
-        MyTableModel model = (MyTableModel) table.getModel();
+        SearchResultsModel model = (SearchResultsModel) table.getModel();
         TableColumn column = null;
         Component comp = null;
         int headerWidth = 0;
@@ -117,6 +124,7 @@ public class SearchResultsTable extends JPanel {
             column = table.getColumnModel().getColumn(i);
  
             comp = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), true, true, 0, i);
+       
             headerWidth = comp.getPreferredSize().width;
  
             comp = table.getDefaultRenderer(model.getColumnClass(i)).getTableCellRendererComponent(table, model.defaultColumnvalues[i], true, true, 0, i);
@@ -127,8 +135,14 @@ public class SearchResultsTable extends JPanel {
     }
     
     
- 
-    class MyTableModel extends AbstractTableModel {
+    /**
+     * The MyTableModel inner class within the SearchResultsTable provides an abstraction for a two-dimensional array of data values for papers.
+     * 
+     * @author mbarrenecheajr
+     *
+     */
+    @SuppressWarnings("serial")
+	class SearchResultsModel extends AbstractTableModel {
   
     	private JTable table = null;
     	private ButtonColumn buttonColumn = null;
@@ -151,7 +165,7 @@ public class SearchResultsTable extends JPanel {
         //Create an empty data array initially.
         private Object[][] data = null;
         
-        public MyTableModel (){
+        public SearchResultsModel (){
         	
         	this.papers = new ArrayList <Paper> ();
         	
@@ -160,7 +174,7 @@ public class SearchResultsTable extends JPanel {
         	    public void actionPerformed(ActionEvent e){
         	    	//Grab the event source (table) and its table model.
         	        JTable table = (JTable)e.getSource();
-        	        MyTableModel model = (MyTableModel) table.getModel();
+        	        SearchResultsModel model = (SearchResultsModel) table.getModel();
         	        
         	        //The table row that was activated.
         	        int modelRow = Integer.valueOf(e.getActionCommand());
@@ -176,7 +190,30 @@ public class SearchResultsTable extends JPanel {
         	
         }
         
-        public void setTable(JTable table) { 
+        /**
+         * This method iterates through all of the rows in the table and returns a list
+         * of rows with selected papers (from user input).
+         * @return
+         */
+        public ArrayList<Paper> getSelectedPapers() {
+        	
+        	//The result list to return.
+        	ArrayList <Paper> results = new ArrayList <Paper> ();
+        	
+        	if (this.data == null || this.data.length == 0)
+        		return results;
+        	
+        	for (int i = 0; i < this.data.length; i++){
+        		
+        		Boolean selectPaperValue = (Boolean) this.data[i][COLNUM_SELECT_PAPER];
+        		if (selectPaperValue == true)
+        			results.add(this.getPaperFromTable(i));
+        	}
+        	
+        	return results;
+		}
+
+		public void setTable(JTable table) { 
         	this.table = table;
         	this.buttonColumn = new ButtonColumn(table, this.selectPaperAbstract, this.columnNames.length - 1);
         }
