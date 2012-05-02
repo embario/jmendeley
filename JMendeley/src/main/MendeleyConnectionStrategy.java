@@ -40,9 +40,12 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 		ArrayList<Paper> papers = new ArrayList<Paper>();
 		
 		try {
+			
 			JSONObject results = new JSONObject(response.getBody());
 			JSONArray documents = results.getJSONArray("documents");
+			
 			for(int i = 0; i < documents.length(); i++) {
+				
 				JSONObject doc = documents.getJSONObject(i);
 				String uuid = doc.getString("uuid");
 				String docURL = String.format(JMendeleyApiUrls.PUBLIC_GET_DOCUMENT_DETAILS, uuid);
@@ -53,36 +56,37 @@ public class MendeleyConnectionStrategy implements ConnectionStrategy {
 				Paper p = new Paper();
 				
 				if(doc.has("abstract"))
-					p.abst = doc.getString("abstract");
+					p.setAbstract(doc.getString("abstract"));
 				
 				JSONArray authors = doc.getJSONArray("authors");
 				String[] docAuthors = new String[authors.length()];
+				
 				for(int j = 0; j < authors.length(); j++) {
 					JSONObject docAuthor = authors.getJSONObject(j);
 					docAuthors[j] = docAuthor.getString("forename") + " " + docAuthor.getString("surname");
 				}
-				p.authors = docAuthors;
 				
-				p.title = doc.getString("title");
+				p.setAuthors(docAuthors);
+				p.setTitle(doc.getString("title"));
 				
 				if(doc.has("publication_outlet")) {
-					p.venue = doc.getString("publication_outlet");
-					p.type = "Journal Article";
-				} else p.type = "Generic";
+					p.setVenue(doc.getString("publication_outlet"));
+					p.setType("Journal Article");
+					
+				} else p.setType("Generic");
 				
-				p.year = doc.getInt("year") + "";
-				
+				p.setYear(doc.getInt("year") + "");
 				papers.add(p);
 			}
 			
-		} catch (JSONException e) { e.printStackTrace(); }
+		} catch (JSONException e) { return papers;}
 		
 		return papers;
 	}
 	
 	public  String buildSearch(ArrayList <String> terms) {
 		
-		String searchTerm = " ";
+		String searchTerm = "";
 		
 		try {
 			

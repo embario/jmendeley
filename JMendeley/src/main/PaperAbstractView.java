@@ -20,10 +20,12 @@ public class PaperAbstractView extends JFrame implements ActionListener {
 	private JButton closeButton;
 	
 	public PaperAbstractView(Paper p) {
-		title = p.title;
-		if(p.abst == null || p.abst.equals("")) {
-			abst = "No abstract available for " + p.title + ", sorry!";
-		} else abst = p.abst;
+		
+		title = p.getTitle();
+		if(p.getAbstract() == null || p.getAbstract().equals("")) {
+			abst = "No abstract available for " + p.getTitle() + ", sorry!";
+		} else abst = p.getAbstract();
+		
 		setVisible(false);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	}

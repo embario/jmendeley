@@ -253,10 +253,10 @@ public class SearchView implements ActionListener {
 
 		this._panel.add(westPanel, BorderLayout.LINE_START);
 		this._panel.add(eastPanel, BorderLayout.CENTER);
-		this._panel.setBackground(Color.DARK_GRAY);
+		this._panel.setBackground(Color.GRAY);
 		
 		this._frame.add(this._panel);
-		this._frame.setBackground(Color.DARK_GRAY);
+		this._frame.setBackground(Color.GRAY);
 		this._frame.pack();
 		this._frame.setVisible(true);
 		this._frame.setFocusable(true);
@@ -317,16 +317,19 @@ public class SearchView implements ActionListener {
 				
 				//The results of our search!
 				ArrayList <Paper> papers = (ArrayList<Paper>) this._searchManager.searchForPapers(terms, connections, numResults);
-				System.out.println(papers);
 				
 				if (papers.isEmpty() == true)
 					JMendeleyUIUtils.showMessageDialog("Your search yielded no results!", "No Search Results", JOptionPane.INFORMATION_MESSAGE);
+				else
+					this._resultsTable.updatePapers(papers); //Go ahead and update the table to contain the papers' information.
 				
 			} else{
 				
 				JMendeleyUIUtils.showMessageDialog("Please select at least one digital library to search.", 
 						"No Digital Library Selected", JOptionPane.INFORMATION_MESSAGE);
 			}
+			
+			
 			
 
 		}//end if SEARCH
@@ -344,5 +347,4 @@ public class SearchView implements ActionListener {
 		}
 		
 	}
-
 }

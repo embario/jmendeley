@@ -175,7 +175,7 @@ public class SearchManager {
 			ArrayList<Paper> pdfPapers = new ArrayList<Paper>(papers.size());
 
 			for (Paper p : papers) 
-				if(p.pdf != null)
+				if(p.getPDF() != null)
 					pdfPapers.add(p);
 
 			/*
@@ -198,8 +198,9 @@ public class SearchManager {
 			for(final Paper p : pdfPapers) {
 				downloadTasks.add(new Callable<Void>() {
 					public Void call() throws Exception {
-						p.file = ByteStreams.toByteArray(p.pdf.openStream());
-						System.out.println(p.title + " PDF downloaded...");
+						
+						p.setFile(ByteStreams.toByteArray(p.getPDF().openStream()));
+						System.out.println(p.getTitle() + " PDF downloaded...");
 						return null;
 					}
 				});
@@ -225,8 +226,8 @@ public class SearchManager {
 			for(final Paper p : pdfPapers) {
 				shaTasks.add(new Callable<Void>() {
 					public Void call() throws Exception {
-						p.sha = SHASum.SHASum(p.file);
-						System.out.println("SHA1 for " + p.title + " calculated...");
+						p.setSHA(SHASum.SHASum(p.getFile()));
+						System.out.println("SHA1 for " + p.getTitle() + " calculated...");
 						return null;
 					}
 				});
@@ -259,18 +260,18 @@ public class SearchManager {
 
 						//Craft the response, POST-it to Mendeley, and get the Document ID back.
 						Response response = am.sendRequest(Verb.POST, JMendeleyApiUrls.USER_POST_DOCUMENT_URL + encodedURL);
-						System.out.println("Metadata for " + p.title + " uploaded...");
+						System.out.println("Metadata for " + p.getTitle() + " uploaded...");
 						JSONObject docIDObj = new JSONObject(response.getBody());
 						String id = docIDObj.getString("document_id");
 
-						if(p.pdf != null) {
+						if(p.getPDF() != null) {
 							//Now, send off the PDF bytes off to specified document PUT request.
 							OAuthRequest request = new OAuthRequest(Verb.PUT, String.format(JMendeleyApiUrls.USER_PUT_DOCUMENT_PDF_URL,id));
 
-							request.addOAuthParameter("oauth_body_hash", p.sha);
-							request.addPayload(p.file);
+							request.addOAuthParameter("oauth_body_hash", p.getSHA());
+							request.addPayload(p.getFile());
 							response = am.sendRequest(request);
-							System.out.println("PDF for " + p.title + " uploaded...");
+							System.out.println("PDF for " + p.getTitle() + " uploaded...");
 						}
 
 						return response;
@@ -308,7 +309,7 @@ public class SearchManager {
 					String id = docIDObj.getString("document_id");
 
 					//Download the PDF, compute SHA checksum.
-					byte[] fileBytes = ByteStreams.toByteArray(p.pdf.openStream());
+					byte[] fileBytes = ByteStreams.toByteArray(p.getPDF().openStream());
 					String sha = SHASum.SHASum(fileBytes);
 
 					//Now, send off the PDF bytes off to specified document PUT request.
@@ -320,9 +321,9 @@ public class SearchManager {
 
 					//If the status is good:
 					if(response.getCode() == 201)
-						System.out.println("\"" + p.title + "\" was uploaded successfully.");
+						System.out.println("\"" + p.getTitle() + "\" was uploaded successfully.");
 					else 
-						System.out.println(String.format("Error %d: \"%s\" failed to upload [%s]",response.getCode(),p.title,response.getBody()));
+						System.out.println(String.format("Error %d: \"%s\" failed to upload [%s]", response.getCode(), p.getTitle(), response.getBody()));
 
 				} catch (Exception e) { e.printStackTrace();}
 			}

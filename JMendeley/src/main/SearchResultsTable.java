@@ -75,13 +75,14 @@ public class SearchResultsTable extends JPanel {
         
         MyTableModel model = this._model = new MyTableModel();
         JTable table = this._table = new JTable(model);
+        table.setCellSelectionEnabled(true);
         model.setTable(table);
         
-        table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+        table.setPreferredScrollableViewportSize(new Dimension(1400, 900));
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
         table.setShowGrid(true);
-        table.setEnabled(false);
+        table.setEnabled(true);
         
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
@@ -92,7 +93,7 @@ public class SearchResultsTable extends JPanel {
         this.add(scrollPane);
     }
     
-    public void updatePaper(ArrayList <Paper> papers){ this._model.updateRows(papers);}
+    public void updatePapers(ArrayList <Paper> papers){ this._model.updateRows(papers);}
     
     
     /*
@@ -107,29 +108,20 @@ public class SearchResultsTable extends JPanel {
         Component comp = null;
         int headerWidth = 0;
         int cellWidth = 0;
-        
-        Object[] defaultValues  = model.defaultColumnvalues;
+       
         TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
  
         //for each column, set it up.
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < model.columnNames.length; i++) {
         	
             column = table.getColumnModel().getColumn(i);
  
-            comp = headerRenderer.getTableCellRendererComponent( null, column.getHeaderValue(), false, false, 0, 0);
+            comp = headerRenderer.getTableCellRendererComponent(table, column.getHeaderValue(), true, true, 0, i);
             headerWidth = comp.getPreferredSize().width;
  
-            comp = table.getDefaultRenderer(model.getColumnClass(i)).getTableCellRendererComponent(table, defaultValues [i], false, false, 0, i);
+            comp = table.getDefaultRenderer(model.getColumnClass(i)).getTableCellRendererComponent(table, model.defaultColumnvalues[i], true, true, 0, i);
             
             cellWidth = comp.getPreferredSize().width;
- 
-            if (DEBUG) {
-                System.out.println("Initializing width of column "
-                                   + i + ". "
-                                   + "headerWidth = " + headerWidth
-                                   + "; cellWidth = " + cellWidth);
-            }
- 
             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
         }
     }
@@ -141,26 +133,31 @@ public class SearchResultsTable extends JPanel {
     	private JTable table = null;
     	private ButtonColumn buttonColumn = null;
     	private Action selectPaperAbstract = null;
-    	private static final int NUM_COLUMNS = 7;
-    	private static final int NUM_ROWS = 10;
     	
-        private String[] columnNames = {"Select Paper", "Title", "Author(s)", "Year", "Publication Reference", "Has PDF", "Abstract"};
-        private Object [] defaultColumnvalues = {Boolean.FALSE, "title of paper", "author(s)", new Integer (2000), "pub ref", null};
+    	private static final int COLNUM_SELECT_PAPER = 0;
+    	private static final int COLNUM_TITLE = 1;
+    	private static final int COLNUM_AUTHOR = 2;
+    	private static final int COLNUM_YEAR = 3;
+    	private static final int COLNUM_TYPE = 4;
+    	private static final int COLNUM_VENUE = 5;
+    	private static final int COLNUM_HASPDF = 6;
+    	private static final int COLNUM_ABSTRACT = 7;
+    	
+        protected String[] columnNames = 			{"Select Paper", 	"Title", 			"Author(s)", 	"Year", 		"Type",		"Venue", 	"Has PDF", 	"Abstract"};
+        private Object [] defaultColumnvalues = 	{Boolean.FALSE, 	"title of paper", 	"author(s)", 	"paper year", 	"generic",	"venue", 	false,		"Abstract"};
         
         private ArrayList <Paper> papers = null;
         
         //Create an empty data array initially.
-        private Object[][] data = {{"", "", "", "", "", "", ""}};
+        private Object[][] data = null;
         
         public MyTableModel (){
         	
         	this.papers = new ArrayList <Paper> ();
         	
-        	this.selectPaperAbstract = new AbstractAction()
-        	{
+        	this.selectPaperAbstract = new AbstractAction() {
         		
-        	    public void actionPerformed(ActionEvent e)
-        	    {
+        	    public void actionPerformed(ActionEvent e){
         	    	//Grab the event source (table) and its table model.
         	        JTable table = (JTable)e.getSource();
         	        MyTableModel model = (MyTableModel) table.getModel();
@@ -190,25 +187,38 @@ public class SearchResultsTable extends JPanel {
         }
         
         public int getColumnCount() {return columnNames.length;}
-        public int getRowCount() {return data.length;}
+        public int getRowCount() {return (data == null) ? 0: data.length;}
         public String getColumnName(int col) {return columnNames[col];}
         
         //Getter, setter methods for table data.
-        public Object getValueAt(int row, int col) {return data[row][col];}
-        public void setValueAt(Object value, int row, int col){
+        public Object getValueAt(int row, int col) {
+        
+        	if (this.data == null){
+        		switch (col){
+        		
+        		//Select Paper
+        		case COLNUM_SELECT_PAPER: return Boolean.FALSE;
+        		//Title
+        		case COLNUM_TITLE: return "";
+        		//Author(s)
+        		case COLNUM_AUTHOR: return "";
+        		//Year
+        		case COLNUM_YEAR: return "";
+        		//Type
+        		case COLNUM_TYPE: return "";
+        		//Venue
+        		case COLNUM_VENUE: return "";
+        		//Has PDF
+        		case COLNUM_HASPDF: return true;
+        		//Abstract
+        		case COLNUM_ABSTRACT: return "";
+        		default: return null;
+        		}
+        	}
         	
-        	data [row][col] = value; 
-        	this.fireTableCellUpdated(row, col);
+        	return data[row][col];
         	
         }
-        
-        protected void updateRows(ArrayList <Paper> papers){
-        	
-        	
-        	
-        	
-        }
-        
         
         /*
          * JTable uses this method to determine the default renderer/
@@ -216,24 +226,75 @@ public class SearchResultsTable extends JPanel {
          * then the last column would contain text ("true"/"false"),
          * rather than a check box.
          */
-        public Class getColumnClass(int c) {
-            return this.getValueAt(0, c).getClass();
+        public Class getColumnClass(int c) { return this.getValueAt(0, c).getClass(); }
+        
+        public void setValueAt(Object value, int row, int col){
+        	
+        	data [row][col] = value; 
+        	this.fireTableCellUpdated(row, col);
+        	
         }
- 
- 
-        private void printDebugData() {
-            int numRows = getRowCount();
-            int numCols = getColumnCount();
- 
-            for (int i=0; i < numRows; i++) {
-                System.out.print("    row " + i + ":");
-                for (int j=0; j < numCols; j++) {
-                    System.out.print("  " + data[i][j]);
-                }
-                System.out.println();
-            }
-            System.out.println("--------------------------");
+        
+        /**
+         * This function accepts a non-empty ArrayList of papers and updates the rows in the table with their information.
+         * @param papers
+         */
+        protected void updateRows(ArrayList <Paper> papers){
+        	
+        	ArrayList <Paper> tablePapers = this.papers;
+        	this.data = new Object [papers.size()][this.columnNames.length];
+        	
+        	//Only if we want to empty the table completely before continuing.
+        	tablePapers.clear();
+        	
+        	//For each paper in the incoming list, we iterate.
+        	for (int i = 0; i < papers.size(); i++){
+        		
+        		Paper paper = papers.get(i);
+
+           		//Select Paper
+        		this.setValueAt(Boolean.FALSE, i, COLNUM_SELECT_PAPER);
+        		//Title
+        		this.setValueAt(paper.getTitle(), i, COLNUM_TITLE);
+        		
+        		//Author(s)
+        		String [] authorNames = paper.getAuthors();
+        		String authors = (authorNames.length == 0) ? "Unknown" : "[";
+        		
+        		for (int j = 0; j < authorNames.length; j++){
+        			if (j != authorNames.length - 1)
+        				authors += authorNames [j] + ", ";
+        			else
+        				authors += authorNames [j] + "]";
+        		}
+        			
+        		this.setValueAt(authors, i, COLNUM_AUTHOR);
+        		//Year
+        		this.setValueAt(paper.getYear(), i, COLNUM_YEAR);
+        		//Type
+        		this.setValueAt(paper.getType(), i, COLNUM_TYPE);
+        		//Venue
+        		this.setValueAt(paper.getVenue(), i, COLNUM_VENUE);
+        		//Has PDF
+    		
+    			if (paper.getPDF() == null)
+    				this.setValueAt(false, i, COLNUM_HASPDF);
+    			else
+    				this.setValueAt(true, i, COLNUM_HASPDF);
+    			
+    			//Abstract
+    			this.setValueAt("Abstract", i, COLNUM_ABSTRACT);
+    			
+    			tablePapers.add(paper);
+        		
+        	}
+        	
+        	this.fireTableDataChanged();
+        	
         }
+        
+
+ 
     }
  
 }

@@ -31,6 +31,8 @@ public class ButtonColumn extends AbstractCellEditor
 	private JButton editButton;
 	private Object editorValue;
 	private boolean isButtonColumnEditor;
+	
+	private static final String BUTTON_NAME = "Abstract";
 
 	/**
 	 *  Create the ButtonColumn to be used as a renderer and editor. The
@@ -46,8 +48,8 @@ public class ButtonColumn extends AbstractCellEditor
 		this.table = table;
 		this.action = action;
 
-		renderButton = new JButton();
-		editButton = new JButton();
+		renderButton = new JButton(BUTTON_NAME);
+		editButton = new JButton(BUTTON_NAME);
 		editButton.setFocusPainted( false );
 		editButton.addActionListener( this );
 		originalBorder = editButton.getBorder();
@@ -185,7 +187,7 @@ public class ButtonColumn extends AbstractCellEditor
 		int row = table.convertRowIndexToModel( table.getEditingRow() );
 		fireEditingStopped();
 
-		//  Invoke the Action
+		System.out.println("BUTTON PRESSED");
 
 		ActionEvent event = new ActionEvent(
 			table,

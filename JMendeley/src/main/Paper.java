@@ -8,15 +8,15 @@ import org.json.JSONObject;
 
 public class Paper {
 	
-	public String title;
-	public String[] authors;
-	public URL pdf;
-	public String sha;
-	public String year;
-	public String type;
-	public String abst;
-	public String venue;
-	public byte[] file;
+	private String title;
+	private String[] authors;
+	private URL pdf;
+	private String sha;
+	private String year;
+	private String type;
+	private String abst;
+	private String venue;
+	private byte[] file;
 	
 	public Paper() {}
 	
@@ -41,6 +41,30 @@ public class Paper {
 		
 		return result;
 	}
+	
+	//Setters
+	public void setTitle (String title) {this.title = title;}
+	public void setAuthors (String [] authors){ this.authors = authors;}
+	public void setPDF (URL pdf){ this.pdf = pdf;}
+	public void setSHA (String sha){ this.sha = sha;}
+	public void setYear (String year){ this.year = year;}
+	public void setType (String type){ this.type = type;}
+	public void setAbstract (String abst){ this.abst = abst;}
+	public void setVenue( String pubref) {this.venue = pubref;}
+	public void setFile (byte [] file){ this.file = file;}
+	
+	//Getters
+	public String getTitle() { return this.title;}
+	public String [] getAuthors(){ return this.authors;}
+	public URL getPDF(){ return this.pdf;}
+	public String getSHA(){ return this.sha;}
+	public String getYear(){ return this.year;}
+	public String getType(){ return this.type;}
+	public String getAbstract(){ return this.abst;}
+	public String getVenue(){ return this.venue;}
+	public byte [] getFile(){ return this.file;}
+	
+	
 	
 	public JSONObject toJSON() {
 		

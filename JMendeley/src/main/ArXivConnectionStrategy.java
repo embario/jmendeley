@@ -53,38 +53,41 @@ public class ArXivConnectionStrategy implements ConnectionStrategy {
 			NodeList entries = doc.getElementsByTagName("entry");
 			
 			for(int i = 0; i < entries.getLength(); i++) {
+				
 				Paper p = new Paper();
-				p.venue = "";
-				p.type = "Generic";
+				p.setVenue("");
+				p.setType("Generic");
 
 				Element entry = (Element) entries.item(i);
 
 				Element titleElement = (Element) entry.getElementsByTagName("title").item(0);
-				p.title = titleElement.getTextContent();
+				p.setTitle(titleElement.getTextContent());
 
 				NodeList authors = entry.getElementsByTagName("author");
 				String[] authorNames = new String[authors.getLength()];
+				
 				for(int j = 0; j < authors.getLength(); j++) {
 					Element authorElement = (Element) authors.item(j);
 					Element authorName = (Element) authorElement.getElementsByTagName("name").item(0);
 					authorNames[j] = authorName.getTextContent();
 				}
-				p.authors = authorNames;
+				
+				p.setAuthors(authorNames);
 
 				NodeList links = entry.getElementsByTagName("link");
 				for(int j = 0; j < links.getLength(); j++) {
 					Element link = (Element) links.item(j);
 					if(link.hasAttribute("title") && link.getAttribute("title").equalsIgnoreCase("pdf")) {
-						p.pdf = new URL(link.getAttribute("href"));
+						p.setPDF(new URL(link.getAttribute("href")));
 						break;
 					}
 				}
 
 				Element published = (Element) entry.getElementsByTagName("published").item(0);
-				p.year = published.getTextContent().split("-")[0];
+				p.setYear(published.getTextContent().split("-")[0]);
 
 				Element abst = (Element) entry.getElementsByTagName("summary").item(0);
-				p.abst = abst.getTextContent();
+				p.setAbstract(abst.getTextContent());
 
 				papers.add(p);
 			}
