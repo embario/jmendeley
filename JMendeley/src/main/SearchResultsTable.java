@@ -80,7 +80,7 @@ public class SearchResultsTable extends JPanel {
         table.setPreferredScrollableViewportSize(new Dimension(800, 600));
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
-        table.setShowGrid(false);
+        table.setShowGrid(true);
         table.setEnabled(false);
         
         //Create the scroll pane and add the table to it.
@@ -138,36 +138,56 @@ public class SearchResultsTable extends JPanel {
  
     class MyTableModel extends AbstractTableModel {
   
-    	private JTable table;
-    	private static final int NUM_COLUMNS = 6;
+    	private JTable table = null;
+    	private ButtonColumn buttonColumn = null;
+    	private Action selectPaperAbstract = null;
+    	private static final int NUM_COLUMNS = 7;
     	private static final int NUM_ROWS = 10;
-        private String[] columnNames = {"Select Paper", "Title", "Author(s)", "Year", "Publication Reference", "Abstract"};
+    	
+        private String[] columnNames = {"Select Paper", "Title", "Author(s)", "Year", "Publication Reference", "Has PDF", "Abstract"};
+        private Object [] defaultColumnvalues = {Boolean.FALSE, "title of paper", "author(s)", new Integer (2000), "pub ref", null};
         
-        public final Object [] defaultColumnvalues = {Boolean.FALSE, "title of paper", "author(s)", new Integer (2000), "pub ref", new JButton("Abstract")}; 
+        private ArrayList <Paper> papers = null;
         
         //Create an empty data array initially.
-        private Object[][] data = {{"", "", "", "", "", ""}};
+        private Object[][] data = {{"", "", "", "", "", "", ""}};
         
         public MyTableModel (){
         	
-        	/*Action delete = new AbstractAction()
+        	this.papers = new ArrayList <Paper> ();
+        	
+        	this.selectPaperAbstract = new AbstractAction()
         	{
+        		
         	    public void actionPerformed(ActionEvent e)
         	    {
+        	    	//Grab the event source (table) and its table model.
         	        JTable table = (JTable)e.getSource();
-        	        int modelRow = Integer.valueOf( e.getActionCommand() );
-        	        ((DefaultTableModel)table.getModel()).removeRow(modelRow);
+        	        MyTableModel model = (MyTableModel) table.getModel();
+        	        
+        	        //The table row that was activated.
+        	        int modelRow = Integer.valueOf(e.getActionCommand());
+        	        
+        	        //Grab the paper for this row.
+        	        Paper paper = model.getPaperFromTable(modelRow);
+        	        PaperAbstractView view = new PaperAbstractView(paper);
+        	        
+        	        //Display the paper abstract.
+        	        view.display();
         	    }
-        	}; */
+        	};
         	
         }
         
         public void setTable(JTable table) { 
         	this.table = table;
-        	this.setValueAt(new ButtonColumn (table, null, data.length - 1, new Paper()), 0, data.length - 1);
-        
+        	this.buttonColumn = new ButtonColumn(table, this.selectPaperAbstract, this.columnNames.length - 1);
         }
         
+        
+        protected Paper getPaperFromTable(int row){
+        	return this.papers.get(row);
+        }
         
         public int getColumnCount() {return columnNames.length;}
         public int getRowCount() {return data.length;}

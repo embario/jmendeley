@@ -1,4 +1,3 @@
-
 package main;
 
 import java.awt.*;
@@ -6,7 +5,6 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
-
 /**
  *  The ButtonColumn class provides a renderer and an editor that looks like a
  *  JButton. The renderer and editor will then be used for a specified column
@@ -20,12 +18,9 @@ import javax.swing.table.*;
  *  the model row number of the button that was clicked.
  *
  */
-public class ButtonColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener
+public class ButtonColumn extends AbstractCellEditor
+	implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener
 {
-	
-	PaperAbstractView view = null;
-	Paper paper  = null;
-	
 	private JTable table;
 	private Action action;
 	private int mnemonic;
@@ -46,13 +41,10 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	 *  @param action the Action to be invoked when the button is invoked
 	 *  @param column the column to which the button renderer/editor is added
 	 */
-	public ButtonColumn(JTable table, Action action, int column, Paper p)
+	public ButtonColumn(JTable table, Action action, int column)
 	{
 		this.table = table;
 		this.action = action;
-		
-		this.view = new PaperAbstractView(p);
-		this.paper = p;
 
 		renderButton = new JButton();
 		editButton = new JButton();
@@ -64,6 +56,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(column).setCellRenderer( this );
 		columnModel.getColumn(column).setCellEditor( this );
+		table.addMouseListener( this );
 	}
 
 
@@ -191,10 +184,13 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	{
 		int row = table.convertRowIndexToModel( table.getEditingRow() );
 		fireEditingStopped();
-		
-		this.view.display();
 
-		ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED, "" + row);
+		//  Invoke the Action
+
+		ActionEvent event = new ActionEvent(
+			table,
+			ActionEvent.ACTION_PERFORMED,
+			"" + row);
 		action.actionPerformed(event);
 	}
 
