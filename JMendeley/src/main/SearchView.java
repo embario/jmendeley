@@ -2,6 +2,7 @@ package main;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -83,6 +84,7 @@ public class SearchView implements ActionListener {
 		this._panel = new JPanel();
 		this._panel.setLayout(new BorderLayout());
 		this._frame.setBounds(500, 300, 1200, 800);
+		this._frame.setMinimumSize(new Dimension(1300,900));
 		
 		/** GUI is split in two panels - east and west panels. **/
 		//East Panel - will hold the search results panel

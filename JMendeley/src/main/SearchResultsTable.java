@@ -79,7 +79,7 @@ public class SearchResultsTable extends JPanel {
         table.setCellSelectionEnabled(true);
         model.setTable(table);
         
-        table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+        //table.setPreferredScrollableViewportSize(new Dimension(800, 600));
         table.setShowHorizontalLines(true);
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
