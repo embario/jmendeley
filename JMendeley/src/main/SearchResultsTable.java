@@ -1,53 +1,13 @@
 package main;
-
-/*
- * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- *   - Neither the name of Oracle or the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
- 
-/*
- * TableDemo.java requires no other files.
- */
  
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import main.TableRenderDemo.MyTableModel;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -56,25 +16,17 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
  
-/** 
- * TableDemo is just like SimpleTableDemo, except that it
- * uses a custom TableModel.
- */
 @SuppressWarnings("serial")
 public class SearchResultsTable extends JPanel {
 
-    private ArrayList <Paper> papers = null;
-    private JTable _table = null;
     private SearchResultsModel _model = null;
  
     public SearchResultsTable () {
     	
         super(new GridLayout(1,0));
- 
-        this.papers = new ArrayList <Paper> ();
         
         SearchResultsModel model = this._model = new SearchResultsModel();
-        JTable table = this._table = new JTable(model);
+        JTable table = new JTable(model);
         model.setTable(table);
         
         table.setName("JMendeley Search Results");
@@ -143,13 +95,10 @@ public class SearchResultsTable extends JPanel {
      * @author mbarrenecheajr
      *
      */
-    @SuppressWarnings("serial")
-	class SearchResultsModel extends AbstractTableModel {
-  
-    	private JTable table = null;
+    class SearchResultsModel extends AbstractTableModel {
+ 
     	private ButtonColumn buttonColumn = null;
-    	private Action selectPaperAbstract = null;
-    	
+    	private Action selectPaperAbstract = null;   	
     	private static final int COLNUM_SELECT_PAPER = 0;
     	private static final int COLNUM_TITLE = 1;
     	private static final int COLNUM_AUTHOR = 2;
@@ -217,7 +166,6 @@ public class SearchResultsTable extends JPanel {
 		}
 
 		public void setTable(JTable table) { 
-        	this.table = table;
         	this.buttonColumn = new ButtonColumn(table, this.selectPaperAbstract, this.columnNames.length - 1);
         }
         
