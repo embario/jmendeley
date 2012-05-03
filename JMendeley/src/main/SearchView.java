@@ -107,11 +107,11 @@ public class SearchView implements ActionListener {
 		JLabel iconImage = new JLabel(icon);
 		
 		Account account = this._account;
-		JLabel accName = new JLabel (account.getName());
-		JLabel accProfileID = new JLabel("Profile ID: " + account.getProfileID());
+		JLabel accName = new JLabel("Account ID:" + account.getName());
+		JLabel accProfileID = new JLabel ("Profile ID: " + account.getProfileID());
 		JLabel accAcademicStatus = new JLabel ("Academic Status: " + account.getAcademicStatus());
-		JLabel accDiscipline = new JLabel("Discipline: " + account.getDiscipline());
-		JLabel accURL = new JLabel("User URL: " + account.getURL());
+		JLabel accDiscipline = new JLabel ("Discipline: " + account.getDiscipline());
+		JLabel accUrl = new JLabel("URL: " + account.getURL());
 		
 		ArrayList <JLabel> accResearchInterests = new ArrayList <JLabel> ();
 		String [] researchInterests = account.getResearchInterests();
@@ -126,7 +126,7 @@ public class SearchView implements ActionListener {
 		profilePanel.add(accName);
 		profilePanel.add(accAcademicStatus);
 		profilePanel.add(accDiscipline);
-		profilePanel.add(accURL);
+		profilePanel.add(accUrl);
 		profilePanel.add(new JLabel("Research Interests: "));
 		for (JLabel ri : accResearchInterests)
 			profilePanel.add(ri);
@@ -230,15 +230,9 @@ public class SearchView implements ActionListener {
     
         /** East Panel Configuration **/
         
-		//Results Panel Configuration - Set up the JTable of type SearchResultsTable.
-		JPanel resultsPanel = new JPanel();
-		resultsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		
 		//Create the JTable and its Scroll Pane.
 		SearchResultsTable table = this._resultsTable = new SearchResultsTable();
-		
-        //Add the scrollpane to the resultsPanel
-        resultsPanel.add(table);
+		table.setBorder(BorderFactory.createLineBorder(Color.black));
         
         //Search Results Action Configuration
         JPanel resultsActionPanel = this._searchResultsActionPanel = new JPanel();
@@ -253,7 +247,7 @@ public class SearchView implements ActionListener {
         
 		
 		//Now, add the results results Action Panel to the eastPanel.
-		eastPanel.add(resultsPanel, BorderLayout.CENTER);
+		eastPanel.add(table, BorderLayout.CENTER);
 		eastPanel.add(resultsActionPanel, BorderLayout.PAGE_END);
 
 		this._panel.add(westPanel, BorderLayout.LINE_START);
@@ -353,7 +347,6 @@ public class SearchView implements ActionListener {
 				
 				//The user answered "Yes".
 				if (answer == 0){
-
 					
 					try {
 						
@@ -361,6 +354,7 @@ public class SearchView implements ActionListener {
 						JMendeleyUIUtils.showMessageDialog("The selected papers were sent your Mendeley Account successfully.", "Successful", JOptionPane.PLAIN_MESSAGE);
 						
 					} catch (Exception e){
+						e.printStackTrace();
 						JMendeleyUIUtils.showMessageDialog("An Unexpected Error occurred when sending selected papers to Mendeley. Please try again.", "Error occurred", JOptionPane.ERROR_MESSAGE);
 					}
 					

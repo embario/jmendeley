@@ -74,10 +74,16 @@ public class Paper {
 			json.put("title", title);
 			JSONArray authors = new JSONArray(this.authors);
 			json.put("authors", authors);
-			json.put("url", pdf.toString());
+			
+			if (this.pdf == null)
+				json.put("url", "");
+			else
+				json.put("url", pdf.toString());
+			
 			json.put("year", year);
 			json.put("abstract", abst);
 			json.put("published_in", venue);
+			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

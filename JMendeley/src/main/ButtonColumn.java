@@ -189,11 +189,8 @@ public class ButtonColumn extends AbstractCellEditor
 
 		System.out.println("BUTTON PRESSED");
 
-		ActionEvent event = new ActionEvent(
-			table,
-			ActionEvent.ACTION_PERFORMED,
-			"" + row);
-		action.actionPerformed(event);
+		ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED,"" + row);
+		this.action.actionPerformed(event);
 	}
 
 //

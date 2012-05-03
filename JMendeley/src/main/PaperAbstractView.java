@@ -54,7 +54,8 @@ public class PaperAbstractView extends JFrame implements ActionListener {
 		buttonPanel.add(close);
 		abstPanel.add(buttonPanel);
 		
-		pack();
+		this.pack();
+		this.setLocation(500, 600);
 		setVisible(true);
 	}
 	

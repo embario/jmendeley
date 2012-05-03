@@ -49,6 +49,7 @@ import javax.swing.table.TableColumn;
 
 import main.TableRenderDemo.MyTableModel;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -61,9 +62,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("serial")
 public class SearchResultsTable extends JPanel {
-	
-    private boolean DEBUG = false;
-    
+
     private ArrayList <Paper> papers = null;
     private JTable _table = null;
     private SearchResultsModel _model = null;
@@ -76,15 +75,18 @@ public class SearchResultsTable extends JPanel {
         
         SearchResultsModel model = this._model = new SearchResultsModel();
         JTable table = this._table = new JTable(model);
-        table.setCellSelectionEnabled(true);
         model.setTable(table);
         
-        //table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+        table.setName("JMendeley Search Results");
+        table.setCellSelectionEnabled(true);
+        table.setPreferredScrollableViewportSize(new Dimension(800, 600));
+        table.setMinimumSize(new Dimension(1200,800));
         table.setShowHorizontalLines(true);
         table.setFillsViewportHeight(true);
         table.setColumnSelectionAllowed(true);
         table.setRowSelectionAllowed(true);
         table.setShowGrid(true);
+        table.setGridColor(Color.gray);
         table.setEnabled(true);
         
         //Create the scroll pane and add the table to it.
@@ -163,7 +165,7 @@ public class SearchResultsTable extends JPanel {
         private ArrayList <Paper> papers = null;
         
         //Create an empty data array initially.
-        private Object[][] data = null;
+        private Object [][] data = null;
         
         public SearchResultsModel (){
         	
@@ -172,6 +174,7 @@ public class SearchResultsTable extends JPanel {
         	this.selectPaperAbstract = new AbstractAction() {
         		
         	    public void actionPerformed(ActionEvent e){
+        	    	
         	    	//Grab the event source (table) and its table model.
         	        JTable table = (JTable)e.getSource();
         	        SearchResultsModel model = (SearchResultsModel) table.getModel();
@@ -258,6 +261,20 @@ public class SearchResultsTable extends JPanel {
         }
         
         /*
+         * Don't need to implement this method unless your table's
+         * editable.
+         */
+        public boolean isCellEditable(int row, int col) {
+            //Note that the data/cell address is constant,
+            //no matter where the cell appears onscreen.
+            if (col != 0 && col != this.columnNames.length - 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        /*
          * JTable uses this method to determine the default renderer/
          * editor for each cell.  If we didn't implement this method,
          * then the last column would contain text ("true"/"false"),
@@ -290,7 +307,7 @@ public class SearchResultsTable extends JPanel {
         		Paper paper = papers.get(i);
 
            		//Select Paper
-        		this.setValueAt(Boolean.FALSE, i, COLNUM_SELECT_PAPER);
+        		this.setValueAt(new Boolean (false), i, COLNUM_SELECT_PAPER);
         		//Title
         		this.setValueAt(paper.getTitle(), i, COLNUM_TITLE);
         		
